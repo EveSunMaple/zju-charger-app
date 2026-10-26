@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../state/demo_state.dart';
+import 'precise_panel.dart';
 import 'scene_model.dart';
 import 'scene_painter.dart';
 
@@ -111,6 +112,8 @@ class _SceneCardState extends ConsumerState<SceneCard>
                           model: _model!,
                           modeT: _morph,
                           clock: _clock,
+                          bearingToTarget: state.bearingToTarget,
+                          stationName: station.name,
                         ),
                       ),
                     Positioned(
@@ -122,6 +125,17 @@ class _SceneCardState extends ConsumerState<SceneCard>
                 ),
               ),
             ),
+          ),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child: isTopDown
+                ? const Padding(
+                    padding: EdgeInsets.only(top: 12),
+                    child: PrecisePanel(),
+                  )
+                : const SizedBox(width: double.infinity),
           ),
         ],
       ),

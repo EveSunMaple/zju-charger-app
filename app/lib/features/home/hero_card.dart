@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
-
 import '../../core/format.dart';
+import '../../core/navigation.dart';
 import '../../core/theme.dart';
 import '../../models/snapshot.dart';
 import '../../state/demo_state.dart';
@@ -130,7 +129,11 @@ class HeroCard extends ConsumerWidget {
                   primary: true,
                   icon: Icons.near_me_outlined,
                   label: '导航前往',
-                  onTap: () => _openNavigation(context, state),
+                  onTap: () => openAmapNavigation(
+                    context: context,
+                    station: state.target,
+                    from: state.myPosition,
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
@@ -184,32 +187,6 @@ class HeroCard extends ConsumerWidget {
     );
   }
 
-  Future<void> _openNavigation(BuildContext context, DemoState state) async {
-    final station = state.target;
-    final me = state.myPosition;
-    final uri = Uri.https('uri.amap.com', '/navigation', {
-      'from': '${me.lon.toStringAsFixed(6)},${me.lat.toStringAsFixed(6)},我的位置',
-      'to': '${station.lon.toStringAsFixed(6)},'
-          '${station.lat.toStringAsFixed(6)},${station.name}',
-      'mode': 'ride',
-      'coordinate': 'gaode',
-    });
-    try {
-      final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
-      if (!opened && context.mounted) {
-        _showMessage(context, '无法打开高德导航');
-      }
-    } catch (_) {
-      if (!context.mounted) return;
-      _showMessage(context, '无法打开高德导航');
-    }
-  }
-
-  void _showMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  }
 }
 
 class _HeroButton extends StatelessWidget {
