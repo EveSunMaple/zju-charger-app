@@ -1,17 +1,48 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme.dart';
+import '../../models/snapshot.dart';
+import '../debug/debug_sheet.dart';
 import 'hero_card.dart';
+import 'radar_card.dart';
 import 'scene_card.dart';
 import 'top_bar.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final GlobalKey _sceneKey = GlobalKey();
+
+  void _scrollToScene(Station _) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final context = _sceneKey.currentContext;
+      if (context == null) return;
+      Scrollable.ensureVisible(
+        context,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeOutCubic,
+        alignment: 0,
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final bottom = MediaQuery.paddingOf(context).bottom;
     return Scaffold(
+      floatingActionButton: FloatingActionButton.small(
+        heroTag: 'debug',
+        backgroundColor: AppColors.card,
+        foregroundColor: AppColors.accent,
+        elevation: 4,
+        onPressed: () => showDebugSheet(context),
+        child: const Icon(Icons.tune, size: 19),
+      ),
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
@@ -19,57 +50,21 @@ class HomePage extends StatelessWidget {
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 520),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 spacing: 12,
                 children: [
-                  TopBar(),
-                  HeroCard(),
-                  SceneCard(),
-                  _RadarPlaceholder(),
-                  _NearbyPlaceholder(),
-                  _Footer(),
+                  const TopBar(),
+                  const HeroCard(),
+                  KeyedSubtree(
+                    key: _sceneKey,
+                    child: const SceneCard(),
+                  ),
+                  RadarCard(onSelect: _scrollToScene),
+                  const _Footer(),
                 ],
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _RadarPlaceholder extends StatelessWidget {
-  const _RadarPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return const AppCard(
-      child: SizedBox(
-        height: 160,
-        child: Center(
-          child: Text(
-            '雷达与附近站点将在下一步接入',
-            style: TextStyle(fontSize: 12, color: AppColors.sub),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _NearbyPlaceholder extends StatelessWidget {
-  const _NearbyPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return const AppCard(
-      child: SizedBox(
-        height: 120,
-        child: Center(
-          child: Text(
-            '附近列表将在下一步接入',
-            style: TextStyle(fontSize: 12, color: AppColors.sub),
           ),
         ),
       ),
