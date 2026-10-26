@@ -2,7 +2,7 @@
 
 ## 目标
 
-在 iOS 模拟器上还原网页原型的主要体验：
+在 iOS 与 Android 模拟器上还原网页原型的主要体验：
 
 - 自动锁定最近可用站点
 - 3D 点云桩体
@@ -20,6 +20,16 @@
 | 精密导航与功率 | 演示控制 |
 | --- | --- |
 | ![精密导航](../screenshots/demo_precise.png) | ![演示控制](../screenshots/demo_debug.png) |
+
+Android 16 / API 36 模拟器：
+
+| 3D 点云 | 2D 俯视 |
+| --- | --- |
+| ![Android 3D](../screenshots/android_3d.png) | ![Android 2D](../screenshots/android_2d.png) |
+
+| 精密导航与功率 | 演示控制 |
+| --- | --- |
+| ![Android 精密导航](../screenshots/android_precise.png) | ![Android 演示控制](../screenshots/android_debug.png) |
 
 ## 运行
 
@@ -61,7 +71,7 @@ flutter run -d "iPhone 18 Pro"
 - 没有指南针传感器，指北针使用模拟方位
 - 没有后端，刷新按钮只做模拟刷新
 - 3D 桩体为合成示意，不是实景结构
-- 只验证 iOS 模拟器；Android 与 HarmonyOS 后续
+- iOS 模拟器与 Android 16 / API 36 模拟器已验证；真机与 HarmonyOS 后续
 - 地图按钮使用外部高德 URI，模拟器中会打开 Safari
 
 ## 验收
@@ -73,3 +83,5 @@ flutter run -d "iPhone 18 Pro"
 - `flutter analyze` 通过
 - `flutter test` 通过（6 个测试）
 - 已在 375px 宽度下检查无 overflow
+- Android 通过 adb 实际点击和滚动验证
+- Android 构建说明见 [ANDROID.md](ANDROID.md)

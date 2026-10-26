@@ -23,6 +23,24 @@ flutter devices
 flutter run -d "iPhone 18 Pro"
 ```
 
+Android 模拟器：
+
+```bash
+export JAVA_HOME=/opt/homebrew/opt/openjdk@17
+export ANDROID_HOME=/opt/homebrew/share/android-commandlinetools
+export ANDROID_SDK_ROOT=$ANDROID_HOME
+flutter run -d emulator-5554
+```
+
+## Android 构建
+
+```bash
+flutter build apk --debug
+flutter build apk --release
+```
+
+产物：`build/app/outputs/flutter-apk/app-debug.apk`（约 146 MB）与 `app-release.apk`（约 46 MB）。当前 release 使用 debug 签名，仅用于验证。完整环境说明见 [`../docs/ANDROID.md`](../docs/ANDROID.md)。
+
 ## 测试
 
 ```bash

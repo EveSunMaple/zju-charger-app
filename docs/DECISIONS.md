@@ -55,3 +55,20 @@
 - 决策：demo 固定使用 Flutter 3.47.8 / Dart 3.13.7。
 - 原因：本机 Xcode 27.1 与 iOS 27 模拟器需要 Flutter 3.47+；该版本已处理 UIScene 生命周期要求。
 - 后续：接入 HarmonyOS 时以当时的 Flutter-OH 版本为准，必要时用第二个 SDK 构建 HAP，Dart 业务代码保持兼容。
+
+## ADR-008 Android 先于 HarmonyOS 验证
+
+- 状态：已确定
+- 日期：2026-10-26
+- 决策：Android 使用官方 Flutter + Android SDK/模拟器先完成验证，HarmonyOS 最后处理。
+- 环境：Flutter 3.47.8、OpenJDK 17、Android SDK API 36、Pixel 7 AVD。
+- 结果：debug APK 在 Android 16 / API 36 模拟器运行通过，3D、2D、雷达、列表、调试面板均验证。
+- 后续：Android 真机、release 签名、HarmonyOS-Flutter 插件验证。
+
+## ADR-009 Gradle 使用阿里云镜像
+
+- 状态：已确定
+- 日期：2026-10-26
+- 决策：Android Gradle 仓库在官方仓库前加入阿里云 Google / Central / Gradle Plugin 镜像。
+- 原因：直接访问 Google Maven 出现 429，且 Flutter 引擎下载速度不稳定。
+- 影响：国内构建更稳定；海外环境可移除镜像，仅保留 `google()` / `mavenCentral()`。

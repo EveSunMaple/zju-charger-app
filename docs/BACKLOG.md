@@ -17,7 +17,8 @@
 - 设备指南针 / 朝向传感器
 - GCJ-02 / WGS-84 坐标纠偏
 - 本地收藏与离线缓存
-- Android 构建与真机测试
+- Android 真机测试（模拟器 debug 构建已完成）
+- Android release 签名与 APK 体积优化
 - 账号体系与跨设备收藏同步
 - 空位提醒：匿名设备 ID + 推送 token
 - 离线推送（APNs / 华为 Push / 厂商通道 / 极光）
