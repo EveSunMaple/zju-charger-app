@@ -17,8 +17,9 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final GlobalKey _sceneKey = GlobalKey();
-  late final ScrollController _scrollController =
-      ScrollController(keepScrollOffset: false);
+  late final ScrollController _scrollController = ScrollController(
+    keepScrollOffset: false,
+  );
 
   @override
   void dispose() {
@@ -65,10 +66,7 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   const TopBar(),
                   const HeroCard(),
-                  KeyedSubtree(
-                    key: _sceneKey,
-                    child: const SceneCard(),
-                  ),
+                  KeyedSubtree(key: _sceneKey, child: const SceneCard()),
                   RadarCard(onSelect: _scrollToScene),
                   const _Footer(),
                 ],
@@ -91,11 +89,7 @@ class _Footer extends StatelessWidget {
       child: Text(
         '数据来源：量子新能 · 离线演示快照\n状态仅供参考，请以现场指示灯为准',
         textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: 10,
-          height: 1.7,
-          color: AppColors.sub,
-        ),
+        style: TextStyle(fontSize: 10, height: 1.7, color: AppColors.sub),
       ),
     );
   }

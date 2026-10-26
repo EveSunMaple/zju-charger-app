@@ -105,17 +105,13 @@ class _NearbyRow extends StatelessWidget {
                     color: station.free > 0 ? AppColors.free : AppColors.busy,
                   ),
                   if (station.fault > 0)
-                    _Chip(
-                      label: '故障 ${station.fault}',
-                      color: AppColors.fault,
-                    ),
+                    _Chip(label: '故障 ${station.fault}', color: AppColors.fault),
                   if (station.offline > 0)
                     _Chip(
                       label: '离线 ${station.offline}',
                       color: AppColors.fault,
                     ),
-                  if (soon > 0)
-                    _Chip(label: '将满 $soon', color: AppColors.free),
+                  if (soon > 0) _Chip(label: '将满 $soon', color: AppColors.free),
                 ],
               ),
               const SizedBox(height: 5),

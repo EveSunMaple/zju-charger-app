@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../core/format.dart';
 import '../../core/navigation.dart';
 import '../../core/theme.dart';
@@ -116,8 +117,7 @@ class HeroCard extends ConsumerWidget {
                     ),
                   ),
                 ),
-              if (remaining > 0)
-                Text('+$remaining', style: AppText.tiny),
+              if (remaining > 0) Text('+$remaining', style: AppText.tiny),
             ],
           ),
           const SizedBox(height: 14),
@@ -144,14 +144,10 @@ class HeroCard extends ConsumerWidget {
                   onTap: state.refreshing
                       ? null
                       : () async {
-                          await ref
-                              .read(demoStateProvider.notifier)
-                              .refresh();
+                          await ref.read(demoStateProvider.notifier).refresh();
                           if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('演示快照无需刷新，数据未变化'),
-                            ),
+                            const SnackBar(content: Text('演示快照无需刷新，数据未变化')),
                           );
                         },
                 ),
@@ -174,9 +170,7 @@ class HeroCard extends ConsumerWidget {
               ],
               Expanded(
                 child: Text(
-                  state.refreshing
-                      ? '正在刷新演示数据…'
-                      : '演示快照 · 数据来自离线文件',
+                  state.refreshing ? '正在刷新演示数据…' : '演示快照 · 数据来自离线文件',
                   style: AppText.tiny,
                 ),
               ),
@@ -186,7 +180,6 @@ class HeroCard extends ConsumerWidget {
       ),
     );
   }
-
 }
 
 class _HeroButton extends StatelessWidget {

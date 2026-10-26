@@ -63,10 +63,10 @@ class ScenePainter extends CustomPainter {
     final te = easeInOutCubic(t);
     final osc = 1 - te;
     final seconds = clock.value;
-    final rotX = (-50 * (1 - te) + math.sin(seconds * 0.85) * 3.5 * osc) *
-        math.pi /
-        180;
-    final rotY = (-15 * (1 - te) + math.sin(seconds * 0.6 + 1.3) * 7 * osc) *
+    final rotX =
+        (-50 * (1 - te) + math.sin(seconds * 0.85) * 3.5 * osc) * math.pi / 180;
+    final rotY =
+        (-15 * (1 - te) + math.sin(seconds * 0.6 + 1.3) * 7 * osc) *
         math.pi /
         180;
     final fit = math.min(
@@ -93,8 +93,7 @@ class ScenePainter extends CustomPainter {
         final x = _lerp(point.p3.x, point.p2.x, eased);
         final y = _lerp(point.p3.y, point.p2.y, eased);
         final z = _lerp(point.p3.z, point.p2.z, eased);
-        final projected =
-            projectPoint(x, y, z, rotX, rotY, scale, cx, cy);
+        final projected = projectPoint(x, y, z, rotX, rotY, scale, cx, cy);
         final radius =
             group.size * projected.scale * (0.85 + ((index * 37) % 10) / 40);
         final pointAlpha = alpha * (0.35 + 0.65 * projected.scale);
@@ -111,9 +110,7 @@ class ScenePainter extends CustomPainter {
     }
 
     for (final slot in model.offlineSlots) {
-      final progress = easeInOutCubic(
-        clampDouble(t * (1 + span) - 0.18, 0, 1),
-      );
+      final progress = easeInOutCubic(clampDouble(t * (1 + span) - 0.18, 0, 1));
       final z = _lerp(model.depth / 2 + 1, 0, progress);
       final c1 = projectPoint(
         slot.cx - slot.half,
@@ -170,16 +167,7 @@ class ScenePainter extends CustomPainter {
           ..strokeWidth = 1
           ..color = const Color(0x668D7F6C),
       );
-      final mid = projectPoint(
-        slot.cx,
-        0,
-        z,
-        rotX,
-        rotY,
-        scale,
-        cx,
-        cy,
-      );
+      final mid = projectPoint(slot.cx, 0, z, rotX, rotY, scale, cx, cy);
       if (mid.scale > 0.8) {
         _drawText(
           canvas,
@@ -288,7 +276,6 @@ class ScenePainter extends CustomPainter {
     );
   }
 
-
   void _paintNavigation(
     Canvas canvas,
     Size size, {
@@ -306,14 +293,7 @@ class ScenePainter extends CustomPainter {
     final direction = (bearingToTarget + 180) % 360;
     final dirX = math.sin(direction * math.pi / 180);
     final dirY = -math.cos(direction * math.pi / 180);
-    final radius = _orbitRadius(
-      size,
-      fit,
-      dirX,
-      dirY,
-      te,
-      38,
-    );
+    final radius = _orbitRadius(size, fit, dirX, dirY, te, 38);
     final x = size.width / 2 + dirX * radius;
     final y = size.height * _lerp(0.47, 0.45, te) + dirY * radius;
 
@@ -375,8 +355,7 @@ class ScenePainter extends CustomPainter {
       canvas.drawCircle(
         Offset(tx, ty),
         2,
-        Paint()
-          ..color = AppColors.accent.withValues(alpha: 0.95 * routeAlpha),
+        Paint()..color = AppColors.accent.withValues(alpha: 0.95 * routeAlpha),
       );
     }
 

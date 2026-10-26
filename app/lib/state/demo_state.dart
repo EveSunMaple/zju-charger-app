@@ -9,8 +9,9 @@ final snapshotProvider = Provider<ChargerSnapshot>((ref) {
   throw UnimplementedError('snapshotProvider must be overridden');
 });
 
-final demoStateProvider =
-    NotifierProvider<DemoStateNotifier, DemoState>(DemoStateNotifier.new);
+final demoStateProvider = NotifierProvider<DemoStateNotifier, DemoState>(
+  DemoStateNotifier.new,
+);
 
 class StationDistance {
   const StationDistance({
@@ -44,19 +45,11 @@ class DemoState {
   GeoPoint get myPosition =>
       destPoint(target.lat, target.lon, simBearing, simDistance);
 
-  double get distanceToTarget => haversine(
-        myPosition.lat,
-        myPosition.lon,
-        target.lat,
-        target.lon,
-      );
+  double get distanceToTarget =>
+      haversine(myPosition.lat, myPosition.lon, target.lat, target.lon);
 
-  double get bearingToTarget => bearing(
-        myPosition.lat,
-        myPosition.lon,
-        target.lat,
-        target.lon,
-      );
+  double get bearingToTarget =>
+      bearing(myPosition.lat, myPosition.lon, target.lat, target.lon);
 
   List<StationDistance> get positions {
     final me = myPosition;

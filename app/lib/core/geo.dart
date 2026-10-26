@@ -8,7 +8,8 @@ double rad(double degrees) => degrees * math.pi / 180;
 double haversine(double lat1, double lon1, double lat2, double lon2) {
   final dLat = rad(lat2 - lat1);
   final dLon = rad(lon2 - lon1);
-  final a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+  final a =
+      math.sin(dLat / 2) * math.sin(dLat / 2) +
       math.cos(rad(lat1)) *
           math.cos(rad(lat2)) *
           math.sin(dLon / 2) *
@@ -18,7 +19,8 @@ double haversine(double lat1, double lon1, double lat2, double lon2) {
 
 double bearing(double lat1, double lon1, double lat2, double lon2) {
   final y = math.sin(rad(lon2 - lon1)) * math.cos(rad(lat2));
-  final x = math.cos(rad(lat1)) * math.sin(rad(lat2)) -
+  final x =
+      math.cos(rad(lat1)) * math.sin(rad(lat2)) -
       math.sin(rad(lat1)) * math.cos(rad(lat2)) * math.cos(rad(lon2 - lon1));
   return (math.atan2(y, x) * 180 / math.pi + 360) % 360;
 }
@@ -31,7 +33,8 @@ GeoPoint destPoint(double lat, double lon, double bearingDeg, double distance) {
   final la2 = math.asin(
     math.sin(la) * math.cos(d) + math.cos(la) * math.sin(d) * math.cos(b),
   );
-  final lo2 = lo +
+  final lo2 =
+      lo +
       math.atan2(
         math.sin(b) * math.sin(d) * math.cos(la),
         math.cos(d) - math.sin(la) * math.sin(la2),

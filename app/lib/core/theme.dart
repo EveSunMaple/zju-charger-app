@@ -30,9 +30,7 @@ class AppText {
     fontWeight: FontWeight.w700,
     color: AppColors.text,
   );
-  static const number = TextStyle(
-    fontFeatures: [FontFeature.tabularFigures()],
-  );
+  static const number = TextStyle(fontFeatures: [FontFeature.tabularFigures()]);
   static const cardTitle = TextStyle(
     fontSize: 13.5,
     height: 1.25,
@@ -57,15 +55,16 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       scaffoldBackgroundColor: AppColors.bg,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.accent,
-        brightness: Brightness.light,
-      ).copyWith(
-        primary: AppColors.accent,
-        onPrimary: AppColors.card,
-        surface: AppColors.card,
-        onSurface: AppColors.text,
-      ),
+      colorScheme:
+          ColorScheme.fromSeed(
+            seedColor: AppColors.accent,
+            brightness: Brightness.light,
+          ).copyWith(
+            primary: AppColors.accent,
+            onPrimary: AppColors.card,
+            surface: AppColors.card,
+            onSurface: AppColors.text,
+          ),
     );
 
     return base.copyWith(

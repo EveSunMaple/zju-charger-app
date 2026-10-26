@@ -146,10 +146,7 @@ class _DebugSheet extends ConsumerWidget {
               isExpanded: true,
               decoration: InputDecoration(
                 labelText: '目标站点',
-                labelStyle: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.sub,
-                ),
+                labelStyle: const TextStyle(fontSize: 12, color: AppColors.sub),
                 filled: true,
                 fillColor: AppColors.dim,
                 contentPadding: const EdgeInsets.symmetric(
@@ -242,9 +239,7 @@ class _PresetChip extends StatelessWidget {
       ),
       backgroundColor: const Color(0x14A26B4A),
       side: const BorderSide(color: Color(0x33A26B4A)),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       visualDensity: VisualDensity.compact,
       padding: const EdgeInsets.symmetric(horizontal: 2),
     );

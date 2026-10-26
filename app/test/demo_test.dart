@@ -81,10 +81,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [snapshotProvider.overrideWithValue(snapshot)],
-        child: MaterialApp(
-          theme: AppTheme.light(),
-          home: const HomePage(),
-        ),
+        child: MaterialApp(theme: AppTheme.light(), home: const HomePage()),
       ),
     );
     await tester.pump(const Duration(milliseconds: 80));
@@ -99,7 +96,9 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets('home renders and the debug sheet switches to 2D', (tester) async {
+  testWidgets('home renders and the debug sheet switches to 2D', (
+    tester,
+  ) async {
     final snapshot = _loadSnapshot();
     await tester.binding.setSurfaceSize(const Size(402, 874));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -107,10 +106,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [snapshotProvider.overrideWithValue(snapshot)],
-        child: MaterialApp(
-          theme: AppTheme.light(),
-          home: const HomePage(),
-        ),
+        child: MaterialApp(theme: AppTheme.light(), home: const HomePage()),
       ),
     );
     await tester.pump(const Duration(milliseconds: 80));
@@ -131,10 +127,7 @@ void main() {
     await tester.tap(find.text('完成'));
     await tester.pump(const Duration(milliseconds: 1500));
     expect(find.text('2D 俯视 · 精密导航'), findsWidgets);
-    expect(
-      find.textContaining('个插口空闲', findRichText: true),
-      findsOneWidget,
-    );
+    expect(find.textContaining('个插口空闲', findRichText: true), findsOneWidget);
     expect(find.textContaining('实时功率'), findsOneWidget);
     expect(find.text('打开地图精确导航'), findsOneWidget);
     expect(tester.takeException(), isNull);

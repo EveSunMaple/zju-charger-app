@@ -24,10 +24,7 @@ double radarRadius(double distance, double maxDistance) {
 }
 
 class RadarPainter extends CustomPainter {
-  RadarPainter({
-    required this.positions,
-    required this.targetName,
-  });
+  RadarPainter({required this.positions, required this.targetName});
 
   final List<StationDistance> positions;
   final String targetName;
@@ -156,10 +153,7 @@ class RadarPainter extends CustomPainter {
         !_samePositions(oldDelegate.positions, positions);
   }
 
-  bool _samePositions(
-    List<StationDistance> a,
-    List<StationDistance> b,
-  ) {
+  bool _samePositions(List<StationDistance> a, List<StationDistance> b) {
     if (a.length != b.length) return false;
     for (var i = 0; i < a.length; i++) {
       if (a[i].station.name != b[i].station.name ||
@@ -172,10 +166,7 @@ class RadarPainter extends CustomPainter {
   }
 }
 
-Station? radarHitTest(
-  Offset position,
-  List<StationDistance> positions,
-) {
+Station? radarHitTest(Offset position, List<StationDistance> positions) {
   final maxD = radarMaxDistance(positions);
   StationDistance? nearest;
   var nearestDistance = 14.0;

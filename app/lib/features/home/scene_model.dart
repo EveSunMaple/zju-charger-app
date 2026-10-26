@@ -175,20 +175,10 @@ SceneModel buildSceneModel(Station station) {
           _lerp(a3.y, b3.y, t),
           _lerp(a3.z, b3.z, t),
         ),
-        Offset3(
-          _lerp(a2.x, b2.x, t),
-          _lerp(a2.y, b2.y, t),
-          0,
-        ),
+        Offset3(_lerp(a2.x, b2.x, t), _lerp(a2.y, b2.y, t), 0),
       );
     });
-    addGroup(
-      points,
-      alpha: alpha,
-      delay: delay,
-      fade2d: fade2d,
-      size: size,
-    );
+    addGroup(points, alpha: alpha, delay: delay, fade2d: fade2d, size: size);
   }
 
   pairLine(
@@ -275,10 +265,7 @@ SceneModel buildSceneModel(Station station) {
   final dust = List.generate(90, (_) {
     final x = (random.next() * 2 - 1) * halfW;
     final y = (random.next() * 2 - 1) * halfH;
-    return ScenePoint(
-      Offset3(x, y, _depth / 2 + 0.5),
-      Offset3(x, y, 0),
-    );
+    return ScenePoint(Offset3(x, y, _depth / 2 + 0.5), Offset3(x, y, 0));
   });
   addGroup(dust, alpha: 0.22, delay: 0.12, fade2d: true, size: 1.3);
 
@@ -346,12 +333,7 @@ SceneModel buildSceneModel(Station station) {
   final ground = <ScenePoint>[];
   for (var x = -halfW - 18; x <= halfW + 18; x += 9) {
     if ((x / 9).round() % 2 == 0) continue;
-    ground.add(
-      ScenePoint(
-        Offset3(x, groundY, 0),
-        Offset3(x, groundY, 0),
-      ),
-    );
+    ground.add(ScenePoint(Offset3(x, groundY, 0), Offset3(x, groundY, 0)));
   }
   addGroup(ground, alpha: 0.3, delay: 0.14, fade2d: true, size: 1.4);
 
@@ -385,7 +367,11 @@ SceneModel buildSceneModel(Station station) {
   }
 
   final offlineSlots = <SceneOfflineSlot>[];
-  for (var deviceIndex = 0; deviceIndex < station.devices.length; deviceIndex++) {
+  for (
+    var deviceIndex = 0;
+    deviceIndex < station.devices.length;
+    deviceIndex++
+  ) {
     final device = station.devices[deviceIndex];
     if (!device.offline) continue;
     final originX = -width / 2 + deviceIndex * (devW + _devGap);
@@ -408,7 +394,14 @@ SceneModel buildSceneModel(Station station) {
     depth: _depth,
     modelWidth: width + 2 * (_pad + _roofOver) + 10,
     modelHeight:
-        height + 2 * _pad + _roofGap + _roofH + groundY - height / 2 - _pad + 34,
+        height +
+        2 * _pad +
+        _roofGap +
+        _roofH +
+        groundY -
+        height / 2 -
+        _pad +
+        34,
     liveDevices: live.length,
     freePortNumbers: freePortNumbers,
   );

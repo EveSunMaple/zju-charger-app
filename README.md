@@ -1,16 +1,23 @@
 # 浙大充电桩
 
-浙江大学充电桩找桩与插口状态展示应用。当前仓库先交付 Flutter demo，数据使用离线快照，重点验证 3D 点云、2D 精确俯视和移动端视觉。
+浙江大学充电桩找桩与插口状态展示应用。当前仓库是可运行的 Flutter demo，数据使用离线快照，重点验证 3D 点云、2D 精确俯视和移动端交互。
 
-## 当前状态
+## 项目状态
 
-- 客户端：Flutter 3.47.x，iOS 模拟器与 Android 模拟器均已验证
-- 数据：内置 `app/assets/data/snapshot.json`
-- 范围：35 个站点 / 137 台设备 / 1644 个插口
-- 暂不包含：实时后端、账号、推送、HarmonyOS、内嵌地图
-- Android：debug / release APK 均已在 Android 16 / API 36 模拟器运行通过
+| 项 | 状态 |
+| --- | --- |
+| iOS 模拟器 | 已验证（iPhone 18 Pro / iOS 27） |
+| Android 模拟器 | 已验证（Pixel 7 / Android 16 / API 36） |
+| Android 构建 | debug APK 约 146 MB，release APK 约 48 MB |
+| 数据 | 离线快照：35 站点 / 137 设备 / 1644 插口 |
+| 后端实时数据 | 未开始 |
+| 账号 / 推送 | 未开始，v1 计划不做账号 |
+| HarmonyOS | 最后处理，尚未开始 |
+| 内嵌地图 | 暂不做，v1 使用外部高德 URI |
 
-## Demo 截图
+## 截图
+
+### iOS 模拟器
 
 | 3D 点云 | 2D 俯视 |
 | --- | --- |
@@ -20,7 +27,7 @@
 | --- | --- |
 | ![精密导航](screenshots/demo_precise.png) | ![演示控制](screenshots/demo_debug.png) |
 
-Android 模拟器验证：
+### Android 模拟器
 
 | 3D 点云 | 2D 俯视 |
 | --- | --- |
@@ -30,7 +37,71 @@ Android 模拟器验证：
 | --- | --- |
 | ![Android 精密导航](screenshots/android_precise.png) | ![Android 演示控制](screenshots/android_debug.png) |
 
+## 功能
+
+- 最近可用站点自动锁定、直线距离与骑行时间估算
+- 站点/设备/插口三级数据，精确到每个插口
+- 3D 点云桩体、轻微振荡、插口状态与浮充「满」标记
+- 25m / 40m 回差，3D 点云展开为 2D 俯视
+- 2D 导航线路、指南针、距离、空闲插口计数
+- 实时功率快照、将满提示
+- 对数刻度雷达、附近列表、点按切换站点
+- 演示控制面板：模拟定位、距离滑块、站点选择
+- 外部高德导航跳转
+- 离线快照、数据年龄提示
+
+## 技术栈
+
+- 客户端：Flutter 3.47.8 / Dart 3.13.7
+- 状态管理：Riverpod
+- 3D/2D 点云：CustomPainter + vector_math
+- 导航：`url_launcher` + 高德 URI
+- 数据：内置 JSON 快照
+- Android：Android SDK API 36 / OpenJDK 17
+- iOS：Xcode 27 / iOS 27 Simulator
+
+## 目录结构
+
+```text
+zju-charger/
+├── app/                         Flutter 客户端
+│   ├── lib/
+│   │   ├── core/                主题、地理计算、格式化、导航
+│   │   ├── data/                快照加载
+│   │   ├── features/
+│   │   │   ├── debug/           演示控制面板
+│   │   │   └── home/            首页、HERO、点云、雷达、列表、精密面板
+│   │   ├── models/              快照/站点/设备/插口/功率模型
+│   │   └── state/               Riverpod 演示状态
+│   ├── assets/data/             离线快照
+│   └── test/                    单元测试与 Widget 测试
+├── docs/                        设计、Demo、Android、决策、后续清单
+├── screenshots/                 iOS 与 Android 截图
+└── README.md
+```
+
 ## 快速开始
+
+### 环境要求
+
+- Flutter 3.47.8（本机位于 `/Users/sunmaple/development/flutter`）
+- iOS：Xcode 27、CocoaPods
+- Android：OpenJDK 17、Android SDK/emulator
+
+### 克隆
+
+```bash
+git clone git@github.com-eve:EveSunMaple/zju-charger-app.git
+cd zju-charger-app
+```
+
+如果使用 HTTPS：
+
+```bash
+git clone https://github.com/EveSunMaple/zju-charger-app.git
+```
+
+### iOS
 
 ```bash
 cd app
@@ -39,32 +110,125 @@ open -a Simulator
 flutter run
 ```
 
-本机 Flutter SDK 位于 `/Users/sunmaple/development/flutter`。未加入全局 PATH 时使用：
+指定设备：
 
 ```bash
-/Users/sunmaple/development/flutter/bin/flutter run
+flutter devices
+flutter run -d "iPhone 18 Pro"
 ```
 
-验证：
-
-```bash
-cd app
-flutter analyze
-flutter test
-```
-
-## Android 验证
+### Android
 
 ```bash
 cd app
 export JAVA_HOME=/opt/homebrew/opt/openjdk@17
 export ANDROID_HOME=/opt/homebrew/share/android-commandlinetools
 export ANDROID_SDK_ROOT=$ANDROID_HOME
-flutter build apk --debug
 flutter run -d emulator-5554
 ```
 
-详细环境与 AVD 配置见 [Android 验证](docs/ANDROID.md)。
+完整 SDK/AVD/Gradle 镜像说明见 [Android 验证](docs/ANDROID.md)。
+
+### 构建 APK
+
+```bash
+cd app
+flutter build apk --debug
+flutter build apk --release
+```
+
+产物：
+
+```text
+app/build/app/outputs/flutter-apk/app-debug.apk
+app/build/app/outputs/flutter-apk/app-release.apk
+```
+
+当前 release 使用 debug 签名，只用于验证，正式发布前需要配置正式 keystore。
+
+## 测试与检查
+
+```bash
+cd app
+dart format --output=none --set-exit-if-changed lib test
+flutter analyze
+flutter test
+```
+
+当前 6 个测试通过：
+
+- 地理距离/方位
+- 快照解析与计数
+- 点云模型口数
+- 25m/40m 模式回差
+- 375px 宽度下无 overflow
+- 首页渲染、调试面板切 2D
+
+## 数据说明
+
+- 数据文件：`app/assets/data/snapshot.json`
+- 来源：原有网页原型的离线快照
+- 内容：35 站点 / 137 设备 / 1644 插口
+- 快照时间真实显示，不伪造实时数据
+- 3D 桩体是合成示意，不是实景结构
+- 真实 GPS、指南针、后端推送尚未接入
+
+更新快照后必须重新运行 `flutter test`，确认解析计数和点云模型测试仍然通过。
+
+## 协作开发
+
+### 分支
+
+- `main`：可运行、测试通过的稳定分支
+- `feat/<name>`：新功能
+- `fix/<name>`：缺陷修复
+- `docs/<name>`：文档
+- `refactor/<name>`：重构
+
+不要直接在 `main` 上开发大功能；提交 PR 前先同步 `main`。
+
+### 提交信息
+
+使用简洁前缀：
+
+```text
+feat: add station list filter
+fix: correct port count on empty device
+docs: update Android setup
+test: cover 2D mode hysteresis
+chore: update Flutter toolchain
+```
+
+### PR 前检查
+
+1. `dart format --output=none --set-exit-if-changed lib test`
+2. `flutter analyze`
+3. `flutter test`
+4. UI 改动附上 iOS/Android 截图
+5. 数据模型或接口改动同步更新 `docs/`
+6. 不提交 `build/`、`.dart_tool/`、`local.properties`、密钥或 `.env`
+
+### 不要提交
+
+- `app/build/`
+- `app/.dart_tool/`
+- `app/android/local.properties`
+- `backend/.env`（后续后端）
+- 任何 keystore、证书、token、服务器密码
+
+### 数据/接口改动
+
+当前 demo 直接读取 `app/assets/data/snapshot.json`。接入后端时，保持 `app/lib/models/snapshot.dart` 的字段兼容，或同步升级测试和 `docs/DECISIONS.md`。
+
+## 后续计划
+
+1. Android 真机验证
+2. FastAPI 数据网关 + WebSocket
+3. 真实定位与坐标系纠偏
+4. 空位提醒（匿名设备 ID + 推送）
+5. HarmonyOS NEXT / Flutter-OH 验证
+
+详见 [后续清单](docs/BACKLOG.md) 与 [技术决策](docs/DECISIONS.md)。
 
 ## 文档
 
@@ -72,3 +236,8 @@ flutter run -d emulator-5554
 - [Android 验证](docs/ANDROID.md)
 - [技术决策](docs/DECISIONS.md)
 - [后续清单](docs/BACKLOG.md)
+- [协作指南](CONTRIBUTING.md)
+
+## 致谢
+
+交互与数据语义来自同学制作的网页原型；本项目将其重做为 Flutter 移动端 demo。

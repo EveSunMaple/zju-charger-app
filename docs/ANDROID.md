@@ -42,11 +42,32 @@ echo no | avdmanager create avd \
 
 ## 启动模拟器
 
+桌面窗口模式，适合人工点击测试：
+
+```bash
+emulator -avd zju_android \
+  -no-audio -no-boot-anim \
+  -gpu host -no-snapshot \
+  -memory 3072 -cores 4
+```
+
+无窗口模式，适合脚本/截图：
+
 ```bash
 emulator -avd zju_android \
   -no-window -no-audio -no-boot-anim \
   -gpu swiftshader_indirect -no-snapshot
 ```
+
+AVD 配置中已建议启用：
+
+```ini
+hw.gpu.enabled=yes
+hw.gpu.mode=host
+hw.ramSize=3G
+```
+
+如果首次启动出现 “System UI isn't responding”，点 Wait 并等待系统稳定；或关闭其他占用内存的模拟器/IDE 后重启。
 
 等待启动：
 

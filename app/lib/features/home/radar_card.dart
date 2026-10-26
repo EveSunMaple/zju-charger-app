@@ -25,10 +25,7 @@ class RadarCard extends ConsumerWidget {
     final radar = GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTapDown: (details) {
-        final station = radarHitTest(
-          details.localPosition,
-          positions,
-        );
+        final station = radarHitTest(details.localPosition, positions);
         if (station != null) select(station);
       },
       child: SizedBox(
@@ -55,10 +52,7 @@ class RadarCard extends ConsumerWidget {
                   children: [
                     radar,
                     const SizedBox(height: 4),
-                    const Text(
-                      '对数刻度 · 点按站点切换',
-                      style: AppText.tiny,
-                    ),
+                    const Text('对数刻度 · 点按站点切换', style: AppText.tiny),
                   ],
                 ),
                 const SizedBox(width: 14),
@@ -77,9 +71,7 @@ class RadarCard extends ConsumerWidget {
             children: [
               Center(child: radar),
               const SizedBox(height: 4),
-              const Center(
-                child: Text('对数刻度 · 点按站点切换', style: AppText.tiny),
-              ),
+              const Center(child: Text('对数刻度 · 点按站点切换', style: AppText.tiny)),
               const SizedBox(height: 10),
               NearbyList(
                 positions: positions,

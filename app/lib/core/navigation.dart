@@ -10,9 +10,11 @@ Future<void> openAmapNavigation({
   required GeoPoint from,
 }) async {
   final uri = Uri.https('uri.amap.com', '/navigation', {
-    'from': '${from.lon.toStringAsFixed(6)},'
+    'from':
+        '${from.lon.toStringAsFixed(6)},'
         '${from.lat.toStringAsFixed(6)},我的位置',
-    'to': '${station.lon.toStringAsFixed(6)},'
+    'to':
+        '${station.lon.toStringAsFixed(6)},'
         '${station.lat.toStringAsFixed(6)},${station.name}',
     'mode': 'ride',
     'coordinate': 'gaode',
@@ -28,7 +30,6 @@ Future<void> openAmapNavigation({
 }
 
 void _showFailure(BuildContext context) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text('无法打开高德导航')),
-  );
+  ScaffoldMessenger.of(context)
+      .showSnackBar(const SnackBar(content: Text('无法打开高德导航')));
 }

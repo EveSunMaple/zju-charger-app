@@ -20,8 +20,10 @@ class PrecisePanel extends ConsumerWidget {
     final hasFree = free > 0;
     final powerItems = _collectPower(station);
     final picked = _pickPower(powerItems);
-    final totalWatts =
-        powerItems.fold<double>(0, (sum, item) => sum + item.power.w);
+    final totalWatts = powerItems.fold<double>(
+      0,
+      (sum, item) => sum + item.power.w,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -72,9 +74,7 @@ class PrecisePanel extends ConsumerWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
           decoration: BoxDecoration(
-            color: hasFree
-                ? const Color(0x145C875C)
-                : const Color(0x12BC5A4C),
+            color: hasFree ? const Color(0x145C875C) : const Color(0x12BC5A4C),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: hasFree
@@ -143,10 +143,7 @@ class PrecisePanel extends ConsumerWidget {
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
                     '+${powerItems.length - picked.length} 口',
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: AppColors.sub,
-                    ),
+                    style: const TextStyle(fontSize: 11, color: AppColors.sub),
                   ),
                 ),
             ],
@@ -288,10 +285,7 @@ class _PowerChip extends StatelessWidget {
       ),
       child: Text.rich(
         TextSpan(
-          style: const TextStyle(
-            fontSize: 11.5,
-            color: AppColors.sub,
-          ),
+          style: const TextStyle(fontSize: 11.5, color: AppColors.sub),
           children: [
             TextSpan(text: '$label '),
             TextSpan(

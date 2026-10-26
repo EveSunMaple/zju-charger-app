@@ -63,7 +63,8 @@ class _SceneCardState extends ConsumerState<SceneCard>
       );
     });
 
-    final key = '${state.target.name}|${state.snapshot.fetchedAt.toIso8601String()}';
+    final key =
+        '${state.target.name}|${state.snapshot.fetchedAt.toIso8601String()}';
     if (key != _modelKey) {
       _modelKey = key;
       _model = buildSceneModel(state.target);
@@ -89,9 +90,7 @@ class _SceneCardState extends ConsumerState<SceneCard>
                 ),
               ),
               const SizedBox(width: 8),
-              _DistanceChip(
-                text: formatDistance(state.distanceToTarget),
-              ),
+              _DistanceChip(text: formatDistance(state.distanceToTarget)),
               const SizedBox(width: 8),
               const _Legend(),
             ],
