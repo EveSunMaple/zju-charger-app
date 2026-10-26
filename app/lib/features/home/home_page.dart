@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme.dart';
 import 'hero_card.dart';
+import 'scene_card.dart';
 import 'top_bar.dart';
 
 class HomePage extends StatelessWidget {
@@ -24,7 +25,7 @@ class HomePage extends StatelessWidget {
                 children: [
                   TopBar(),
                   HeroCard(),
-                  _ScenePlaceholder(),
+                  SceneCard(),
                   _RadarPlaceholder(),
                   _NearbyPlaceholder(),
                   _Footer(),
@@ -33,56 +34,6 @@ class HomePage extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _ScenePlaceholder extends StatelessWidget {
-  const _ScenePlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Row(
-            children: [
-              Expanded(
-                child: Text(
-                  '紫金港玉湖 · 紫金港校区',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppText.cardTitle,
-                ),
-              ),
-              Text('200 m', style: AppText.small),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Container(
-            height: 330,
-            decoration: BoxDecoration(
-              color: AppColors.card2,
-              borderRadius: BorderRadius.circular(16),
-              gradient: const RadialGradient(
-                center: Alignment(0, 0.25),
-                radius: 0.8,
-                colors: [Color(0x0DA26B4A), AppColors.card2],
-              ),
-            ),
-            alignment: Alignment.center,
-            child: const Text(
-              '3D 点云将在下一步接入',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.sub,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
