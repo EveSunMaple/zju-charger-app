@@ -175,7 +175,6 @@ class RadarPainter extends CustomPainter {
 Station? radarHitTest(
   Offset position,
   List<StationDistance> positions,
-  String targetName,
 ) {
   final maxD = radarMaxDistance(positions);
   StationDistance? nearest;

@@ -28,7 +28,6 @@ class RadarCard extends ConsumerWidget {
         final station = radarHitTest(
           details.localPosition,
           positions,
-          state.target.name,
         );
         if (station != null) select(station);
       },

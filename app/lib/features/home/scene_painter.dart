@@ -312,7 +312,7 @@ class ScenePainter extends CustomPainter {
       dirX,
       dirY,
       te,
-      30,
+      38,
     );
     final x = size.width / 2 + dirX * radius;
     final y = size.height * _lerp(0.47, 0.45, te) + dirY * radius;
@@ -393,13 +393,13 @@ class ScenePainter extends CustomPainter {
     );
 
     canvas.save();
-    canvas.translate(x, y - 14);
+    canvas.translate(x, y - 12);
     canvas.rotate(bearingToTarget * math.pi / 180);
     final arrow = Path()
-      ..moveTo(0, -12)
-      ..lineTo(7, 6)
+      ..moveTo(0, -10)
+      ..lineTo(5, 5)
       ..lineTo(0, 1)
-      ..lineTo(-7, 6)
+      ..lineTo(-5, 5)
       ..close();
     canvas.drawPath(
       arrow,
@@ -429,8 +429,8 @@ class ScenePainter extends CustomPainter {
     final tSx = dx.abs() > 1e-4 ? stageHalfW / dx.abs() : 1e9;
     final tSy = dy.abs() > 1e-4 ? stageHalfH / dy.abs() : 1e9;
     final scale2d = fit * 0.88;
-    final halfW = model.modelWidth / 2 * scale2d;
-    final halfH = model.modelHeight / 2 * scale2d;
+    final halfW = model.width / 2 * scale2d;
+    final halfH = model.height / 2 * scale2d;
     final tEx = dx.abs() > 1e-4 ? halfW / dx.abs() : 1e9;
     final tEy = dy.abs() > 1e-4 ? halfH / dy.abs() : 1e9;
     final r1 = math.min(math.min(tEx, tEy) + pad, math.min(tSx, tSy));
@@ -522,7 +522,9 @@ class ScenePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant ScenePainter oldDelegate) {
-    return oldDelegate.model != model;
+    return oldDelegate.model != model ||
+        oldDelegate.bearingToTarget != bearingToTarget ||
+        oldDelegate.stationName != stationName;
   }
 }
 

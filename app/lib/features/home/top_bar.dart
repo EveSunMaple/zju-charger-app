@@ -39,32 +39,41 @@ class TopBar extends ConsumerWidget {
               color: AppColors.text,
             ),
           ),
-          const Spacer(),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 7,
-                height: 7,
-                decoration: BoxDecoration(
-                  color: statusColor,
-                  shape: BoxShape.circle,
+          const SizedBox(width: 8),
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerRight,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 7,
+                      height: 7,
+                      decoration: BoxDecoration(
+                        color: statusColor,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(statusText, style: AppText.small),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 6),
+                      child: Text('·', style: AppText.small),
+                    ),
+                    Text(
+                      '快照 ${formatSnapshotTime(snapshot.fetchedAt)} · '
+                      '${formatAge(snapshot.fetchedAt)}',
+                      style: AppText.small.copyWith(
+                        color: stale ? AppColors.warn : AppColors.sub,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 6),
-              Text(statusText, style: AppText.small),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 6),
-                child: Text('·', style: AppText.small),
-              ),
-              Text(
-                '内置快照 ${formatSnapshotTime(snapshot.fetchedAt)} · '
-                '${formatAge(snapshot.fetchedAt)}',
-                style: AppText.small.copyWith(
-                  color: stale ? AppColors.warn : AppColors.sub,
-                ),
-              ),
-            ],
+            ),
           ),
         ],
       ),

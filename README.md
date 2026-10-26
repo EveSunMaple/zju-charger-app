@@ -9,6 +9,16 @@
 - 范围：35 个站点 / 137 台设备 / 1644 个插口
 - 暂不包含：实时后端、账号、推送、HarmonyOS、内嵌地图
 
+## Demo 截图
+
+| 3D 点云 | 2D 俯视 |
+| --- | --- |
+| ![3D](screenshots/demo_3d.png) | ![2D](screenshots/demo_2d.png) |
+
+| 精密导航与功率 | 演示控制 |
+| --- | --- |
+| ![精密导航](screenshots/demo_precise.png) | ![演示控制](screenshots/demo_debug.png) |
+
 ## 快速开始
 
 ```bash
@@ -22,6 +32,14 @@ flutter run
 
 ```bash
 /Users/sunmaple/development/flutter/bin/flutter run
+```
+
+验证：
+
+```bash
+cd app
+flutter analyze
+flutter test
 ```
 
 ## 文档

@@ -17,6 +17,14 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final GlobalKey _sceneKey = GlobalKey();
+  late final ScrollController _scrollController =
+      ScrollController(keepScrollOffset: false);
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   void _scrollToScene(Station _) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -46,6 +54,7 @@ class _HomePageState extends State<HomePage> {
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
+          controller: _scrollController,
           padding: EdgeInsets.fromLTRB(14, 10, 14, 24 + bottom),
           child: Center(
             child: ConstrainedBox(

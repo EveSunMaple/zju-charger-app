@@ -47,3 +47,11 @@
 - 决策：demo 与 v1 先交付 iOS/Android；HarmonyOS NEXT 在 Flutter-OH 插件验证通过后接入。
 - 原因：当前无鸿蒙真机与开发者账号；鸿蒙模拟器需要免费华为账号 + 实名。
 - 后续：接入时必须先验证定位、指南针、推送、HAP 签名和 Flutter-OH 版本。
+
+## ADR-007 Demo 使用 Flutter 3.47.8
+
+- 状态：已确定
+- 日期：2026-10-26
+- 决策：demo 固定使用 Flutter 3.47.8 / Dart 3.13.7。
+- 原因：本机 Xcode 27.1 与 iOS 27 模拟器需要 Flutter 3.47+；该版本已处理 UIScene 生命周期要求。
+- 后续：接入 HarmonyOS 时以当时的 Flutter-OH 版本为准，必要时用第二个 SDK 构建 HAP，Dart 业务代码保持兼容。
