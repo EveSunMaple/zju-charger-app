@@ -82,10 +82,38 @@ zju-charger/
 │   ├── data/                    站点清单、种子快照、SQLite（生成的）
 │   └── tests/                   后端测试
 ├── infra/                       Docker Compose 与 Caddy 示例
-├── docs/                        设计、Demo、Android、后端、决策、后续清单
+├── .github/                     CI、PR 模板
+├── docs/                        设计、Demo、Android、后端、CI、决策、后续清单
 ├── screenshots/                 iOS 与 Android 截图
 └── README.md
 ```
+
+## 每次提交自动打包
+
+每次 push / PR 都会运行 CI：
+
+1. Flutter format / analyze / test
+2. 后端 pytest
+3. Android debug + release APK
+
+构建成功后在该 Actions run 页面底部的 **Artifacts** 下载：
+
+```text
+zju-charger-android-<commit-sha>/
+├── app-debug.apk
+├── app-release.apk
+└── SHA256SUMS
+```
+
+Actions 页面：
+
+```text
+https://github.com/EveSunMaple/zju-charger-app/actions/workflows/flutter-ci.yml
+```
+
+可选：在仓库 **Settings → Secrets and variables → Actions → Variables** 设置 `API_BASE_URL`，CI 会把该地址打进 APK；不设置时 APK 使用离线快照。iOS/HarmonyOS 暂未加入 CI。
+
+详见 [CI 流水线](docs/CI.md)。
 
 ## 快速开始
 
@@ -277,6 +305,7 @@ chore: update Flutter toolchain
 - [Demo 说明](docs/DEMO.md)
 - [Android 验证](docs/ANDROID.md)
 - [后端与实时数据](docs/BACKEND.md)
+- [CI 流水线](docs/CI.md)
 - [技术决策](docs/DECISIONS.md)
 - [后续清单](docs/BACKLOG.md)
 - [协作指南](CONTRIBUTING.md)
