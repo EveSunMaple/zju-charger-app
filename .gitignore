@@ -16,3 +16,6 @@ backend/data/device_cache.json
 backend/data/fetch.log
 backend/data/push.db
 backend/data/push.db-*
+
+# Python test cache
+.pytest_cache/

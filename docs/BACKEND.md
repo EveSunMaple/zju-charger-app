@@ -147,6 +147,10 @@ flutter run -d "iPhone 18 Pro" \
 
 ## 部署
 
+完整步骤见 [后端部署指南](DEPLOYMENT.md)。
+
+简要流程：
+
 ```bash
 cd infra
 cp ../backend/.env.example ../backend/.env
@@ -154,16 +158,7 @@ docker compose up -d --build
 docker compose logs -f api
 ```
 
-建议只暴露 80/443，API 8000 仅本机或容器网络，使用 Caddy/Nginx 终止 HTTPS。
-
-生产检查：
-
-```bash
-curl https://charger.example.com/healthz
-curl https://charger.example.com/v1/meta
-```
-
-备份 `backend/data/snapshot.json` 和 `backend/data/push.db`。
+建议只暴露 80/443，API 8000 仅本机或容器网络，使用 Caddy/Nginx 终止 HTTPS。备份 `backend/data/snapshot.json` 和 `backend/data/push.db`。
 
 ## 已知限制
 

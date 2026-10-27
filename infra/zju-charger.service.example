@@ -1,0 +1,19 @@
+[Unit]
+Description=ZJU Charger API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=zju
+Group=zju
+WorkingDirectory=/opt/zju-charger/backend
+EnvironmentFile=/opt/zju-charger/backend/.env
+ExecStart=/opt/zju-charger/backend/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

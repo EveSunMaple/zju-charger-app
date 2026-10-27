@@ -208,7 +208,7 @@ PUT    /v1/devices/{device_id}
 DELETE /v1/devices/{device_id}
 ```
 
-接口、订阅规则与部署见 [后端与实时数据](docs/BACKEND.md)；推送见 [空位提醒与推送](docs/PUSH.md)。
+接口与订阅规则见 [后端与实时数据](docs/BACKEND.md)；部署步骤见 [后端部署指南](docs/DEPLOYMENT.md)；推送见 [空位提醒与推送](docs/PUSH.md)。
 
 客户端接入：
 
@@ -331,6 +331,7 @@ chore: update Flutter toolchain
 - [Demo 说明](docs/DEMO.md)
 - [Android 验证](docs/ANDROID.md)
 - [后端与实时数据](docs/BACKEND.md)
+- [后端部署指南](docs/DEPLOYMENT.md)
 - [空位提醒与推送](docs/PUSH.md)
 - [CI 流水线](docs/CI.md)
 - [技术决策](docs/DECISIONS.md)
