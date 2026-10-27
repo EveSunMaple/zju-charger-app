@@ -27,6 +27,12 @@ android {
         // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        val jpushAppKey = System.getenv("JPUSH_APP_KEY")
+            ?.takeIf { it.isNotBlank() }
+            ?: "000000000000000000000000"
+        manifestPlaceholders["JPUSH_PKGNAME"] = "com.zjucharger.zju_charger"
+        manifestPlaceholders["JPUSH_APPKEY"] = jpushAppKey
+        manifestPlaceholders["JPUSH_CHANNEL"] = "developer-default"
     }
 
     buildTypes {

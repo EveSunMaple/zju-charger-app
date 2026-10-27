@@ -6,6 +6,9 @@ import '../../core/navigation.dart';
 import '../../core/theme.dart';
 import '../../models/snapshot.dart';
 import '../../state/demo_state.dart';
+import '../../state/preferences_state.dart';
+import '../../state/reminder_service.dart';
+import '../favorites/favorites_sheet.dart';
 
 class HeroCard extends ConsumerWidget {
   const HeroCard({super.key});
@@ -15,6 +18,10 @@ class HeroCard extends ConsumerWidget {
     final state = ref.watch(demoStateProvider);
     final station = state.target;
     final hasFree = station.free > 0;
+    final prefs = ref.watch(stationPrefsProvider);
+    final favorite = prefs.favorites.contains(station.name);
+    final reminder = prefs.reminders.contains(station.name);
+    final reminderService = ref.watch(reminderServiceProvider);
     final ports = station.ports;
     final strip = ports.take(12).toList(growable: false);
     final remaining = ports.length - strip.length;
@@ -144,18 +151,87 @@ class HeroCard extends ConsumerWidget {
                   onTap: state.refreshing
                       ? null
                       : () async {
-                          final updated = await ref
-                              .read(demoStateProvider.notifier)
-                              .refresh();
+                          final notifier = ref.read(demoStateProvider.notifier);
+                          final updated = state.snapshot.source == 'api'
+                              ? await notifier.refreshStation()
+                              : await notifier.refresh();
                           if (!context.mounted) return;
                           final message = updated
-                              ? '数据已更新'
+                              ? (state.snapshot.source == 'api'
+                                    ? '当前站数据已刷新'
+                                    : '数据已更新')
                               : (state.snapshot.source == 'api'
-                                    ? '刷新失败，请检查后端服务'
+                                    ? '刷新失败，请稍后重试'
                                     : '演示快照无需刷新，数据未变化');
                           ScaffoldMessenger.of(context)
                               .showSnackBar(SnackBar(content: Text(message)));
                         },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              _PrefChip(
+                icon: favorite ? Icons.star : Icons.star_border,
+                label: favorite ? '已收藏' : '收藏',
+                active: favorite,
+                onTap: () async {
+                  final added = await ref
+                      .read(stationPrefsProvider.notifier)
+                      .toggleFavorite(station.name);
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(added ? '已加入本地收藏' : '已取消收藏')),
+                  );
+                },
+              ),
+              const SizedBox(width: 8),
+              _PrefChip(
+                icon: reminder
+                    ? Icons.notifications_active
+                    : Icons.notifications_none,
+                label: reminder ? '提醒已开' : '空位提醒',
+                active: reminder,
+                enabled: reminderService.available || reminder,
+                onTap: () async {
+                  if (!reminderService.available && !reminder) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('推送未配置，暂时无法开启空位提醒')),
+                    );
+                    return;
+                  }
+                  final added = await ref
+                      .read(stationPrefsProvider.notifier)
+                      .toggleReminder(station.name);
+                  final synced = await reminderService.sync(
+                    ref.read(stationPrefsProvider).reminders,
+                  );
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        synced
+                            ? (added ? '已开启该站空位提醒' : '已关闭该站空位提醒')
+                            : '提醒已保存，但同步服务器失败',
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const Spacer(),
+              TextButton.icon(
+                onPressed: () => showFavoritesSheet(context),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.accent,
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                ),
+                icon: const Icon(Icons.bookmark_border, size: 16),
+                label: const Text(
+                  '收藏夹',
+                  style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700),
                 ),
               ),
             ],
@@ -179,7 +255,8 @@ class HeroCard extends ConsumerWidget {
                   state.refreshing
                       ? '正在同步数据…'
                       : (state.snapshot.source == 'api'
-                            ? '实时数据 · 来自校园充电桩网关'
+                            ? '实时数据 · 本桩 '
+                                  '${formatAge(state.target.observedAt ?? state.snapshot.fetchedAt)}'
                             : '演示快照 · 数据来自离线文件'),
                   style: AppText.tiny,
                 ),
@@ -237,6 +314,66 @@ class _HeroButton extends StatelessWidget {
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: foreground,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PrefChip extends StatelessWidget {
+  const _PrefChip({
+    required this.icon,
+    required this.label,
+    required this.active,
+    required this.onTap,
+    this.enabled = true,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool active;
+  final VoidCallback onTap;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    return Opacity(
+      opacity: enabled ? 1 : 0.45,
+      child: Material(
+        color: active ? const Color(0x1AA26B4A) : AppColors.dim,
+        borderRadius: BorderRadius.circular(10),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          onTap: enabled ? onTap : null,
+          child: Container(
+            height: 32,
+            padding: const EdgeInsets.symmetric(horizontal: 9),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: active ? const Color(0x33A26B4A) : AppColors.line,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: 15,
+                  color: active ? AppColors.accent : AppColors.sub,
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: active ? AppColors.accent : AppColors.sub,
                   ),
                 ),
               ],

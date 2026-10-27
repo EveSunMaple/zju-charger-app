@@ -35,4 +35,45 @@ class SnapshotRepository {
     final json = jsonDecode(raw) as Map<String, dynamic>;
     return ChargerSnapshot.fromJson(json);
   }
+
+  Future<bool> refreshStation(String name) async {
+    final base = apiBaseUrl.trim().replaceAll(RegExp(r'/+$'), '');
+    if (base.isEmpty) return false;
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$base/v1/stations/${Uri.encodeComponent(name)}/refresh'),
+          )
+          .timeout(const Duration(seconds: 10));
+      return response.statusCode == 202;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> registerDevice({
+    required String deviceId,
+    required String platform,
+    required String pushToken,
+    required Set<String> stationNames,
+  }) async {
+    final base = apiBaseUrl.trim().replaceAll(RegExp(r'/+$'), '');
+    if (base.isEmpty || pushToken.isEmpty) return false;
+    try {
+      final response = await http
+          .put(
+            Uri.parse('$base/v1/devices/${Uri.encodeComponent(deviceId)}'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'platform': platform,
+              'push_token': pushToken,
+              'station_names': stationNames.toList()..sort(),
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
+      return response.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
+  }
 }

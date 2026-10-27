@@ -5,11 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zju_charger/core/geo.dart';
+import 'package:zju_charger/core/local_store.dart';
+import 'package:zju_charger/core/push_service.dart';
 import 'package:zju_charger/core/theme.dart';
 import 'package:zju_charger/features/home/home_page.dart';
 import 'package:zju_charger/features/home/scene_model.dart';
 import 'package:zju_charger/models/snapshot.dart';
 import 'package:zju_charger/state/demo_state.dart';
+import 'package:zju_charger/state/preferences_state.dart';
 
 ChargerSnapshot _loadSnapshot() {
   final raw = File('assets/data/snapshot.json').readAsStringSync();
@@ -71,6 +74,45 @@ void main() {
 
     notifier.selectStation('紫金港医学院南侧');
     expect(container.read(demoStateProvider).target.name, '紫金港医学院南侧');
+  });
+
+  test('local store persists favorites and reminders in memory', () async {
+    final store = LocalStore.memory();
+    expect(await store.toggleFavorite('A'), isTrue);
+    expect(await store.toggleReminder('A'), isTrue);
+    expect(store.favorites, contains('A'));
+    expect(store.reminders, contains('A'));
+    expect(await store.toggleFavorite('A'), isFalse);
+    expect(store.favorites, isNot(contains('A')));
+  });
+
+  testWidgets('notification tap selects the station', (tester) async {
+    final snapshot = _loadSnapshot();
+    final pushService = PushService();
+    final container = ProviderContainer(
+      overrides: [
+        snapshotProvider.overrideWithValue(snapshot),
+        pushServiceProvider.overrideWithValue(pushService),
+        localStoreProvider.overrideWithValue(LocalStore.memory()),
+      ],
+    );
+    addTearDown(container.dispose);
+    addTearDown(pushService.dispose);
+    await tester.binding.setSurfaceSize(const Size(402, 874));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(theme: AppTheme.light(), home: const HomePage()),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 80));
+    pushService.openedStation.value = '紫金港医学院南侧';
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(container.read(demoStateProvider).target.name, '紫金港医学院南侧');
+    await tester.pumpWidget(const SizedBox.shrink());
   });
 
   testWidgets('home fits a 375px wide screen without overflow', (tester) async {

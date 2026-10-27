@@ -98,11 +98,21 @@ flutter run -d emulator-5554 \
   --dart-define=API_BASE_URL=http://10.0.2.2:8000
 ```
 
+联调收藏/空位提醒，没有 JPush 凭据时：
+
+```bash
+flutter run -d emulator-5554 \
+  --dart-define=API_BASE_URL=http://10.0.2.2:8000 \
+  --dart-define=DEBUG_PUSH_TOKEN=demo-push-token-1234
+```
+
+真实 JPush：同时设置环境变量 `JPUSH_APP_KEY`（Gradle 占位符）和 `--dart-define=JPUSH_APP_KEY=...`，详见 [PUSH.md](PUSH.md)。
+
 产物：
 
 ```text
 app/build/app/outputs/flutter-apk/app-debug.apk    # 约 146 MB
-app/build/app/outputs/flutter-apk/app-release.apk  # 约 46 MB
+app/build/app/outputs/flutter-apk/app-release.apk  # 约 54 MB
 ```
 
 当前 release 仍使用 debug 签名，仅用于验证；正式发布前需要配置正式 keystore、混淆和体积优化。

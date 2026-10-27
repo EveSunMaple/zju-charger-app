@@ -9,6 +9,8 @@
 - 距离小于 25m 时逐点飞掠为 2D 俯视
 - 精密导航面板、雷达与附近列表
 - 功率/将满信息
+- 本地收藏、收藏夹、空位提醒
+- 单站刷新与站点数据年龄
 - 调试面板模拟定位
 
 ## 截图
@@ -91,7 +93,8 @@ flutter run -d "iPhone 18 Pro"
 - 3D 桩体为合成示意，不是实景结构
 - 全量刷新约 3-4 分钟，不是秒级实时
 - 单站刷新合并进全量快照，全量 `fetched_at` 不变，单站有 `observed_at`
-- iOS 模拟器与 Android 16 / API 36 模拟器已验证；真机与 HarmonyOS 后续
+- 账号与跨设备同步永久不做；收藏和提醒只存在当前设备
+- iOS 模拟器与 Android 16 / API 36 模拟器已验证；真实 JPush 端到端与 HarmonyOS 后续
 - 地图按钮使用外部高德 URI，模拟器中会打开 Safari
 
 ## 验收
@@ -101,7 +104,7 @@ flutter run -d "iPhone 18 Pro"
 - 10m → 200m 触发 2D→3D
 - 站点切换、端口颜色、空闲数、功率 chips 与快照一致
 - `flutter analyze` 通过
-- `flutter test` 通过（6 个测试）
+- `flutter test` 通过（8 个测试）
 - 已在 375px 宽度下检查无 overflow
 - Android 通过 adb 实际点击和滚动验证
 - Android 构建说明见 [ANDROID.md](ANDROID.md)

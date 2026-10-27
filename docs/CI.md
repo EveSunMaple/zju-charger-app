@@ -31,19 +31,25 @@ zju-charger-android-<commit-sha>/
 └── SHA256SUMS
 ```
 
-- `app-release.apk`：约 48 MB，当前使用 debug 签名，仅用于内部测试
+- `app-release.apk`：约 54 MB，当前使用 debug 签名，仅用于内部测试
 - `app-debug.apk`：约 146 MB，保留调试能力
 - `SHA256SUMS`：APK 校验和
 
-## API 地址
+## Variables
 
-在仓库 Variables 中设置：
+在仓库 Variables 中可选设置：
 
 ```text
 API_BASE_URL=https://charger.example.com
+JPUSH_APP_KEY=极光 AppKey
+DEBUG_PUSH_TOKEN=demo-push-token-1234
 ```
 
-CI 会通过 `--dart-define=API_BASE_URL=...` 打进 APK。未设置时使用 `assets/data/snapshot.json` 离线快照。
+CI 会通过 `--dart-define=...` 打进 APK：
+
+- 未设置 `API_BASE_URL` 时使用 `assets/data/snapshot.json` 离线快照
+- 未设置 `JPUSH_APP_KEY` 时推送关闭
+- `DEBUG_PUSH_TOKEN` 仅用于没有 JPush 凭据时验证订阅流程
 
 正式环境必须使用 HTTPS；Android release 包不允许 cleartext HTTP。
 

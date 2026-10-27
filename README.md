@@ -8,11 +8,12 @@
 | --- | --- |
 | iOS 模拟器 | 已验证（iPhone 18 Pro / iOS 27） |
 | Android 模拟器 | 已验证（Pixel 7 / Android 16 / API 36） |
-| Android 构建 | debug APK 约 146 MB，release APK 约 48 MB |
+| Android 构建 | debug APK 约 146 MB，release APK 约 54 MB |
 | 数据 | 离线快照 + FastAPI 实时网关 |
-| 实时网关 | 已实现：SQLite 快照、全量/单站刷新、功率遥测、WebSocket 事件 |
+| 实时网关 | 已实现：全量/单站刷新、功率遥测、快照 JSON、匿名推送 |
 | 客户端联调 | Android debug 包已拉到真实 `/v1/snapshot` |
-| 账号 / 推送 | 未开始，v1 计划不做账号 |
+| 本地收藏 / 空位提醒 | 已实现，匿名设备，不需要账号 |
+| 账号 / 跨设备同步 | 永久取消，不做登录、用户表、跨设备收藏 |
 | HarmonyOS | 最后处理，尚未开始 |
 | 内嵌地图 | 暂不做，v1 使用外部高德 URI |
 
@@ -49,6 +50,9 @@
 - 对数刻度雷达、附近列表、点按切换站点
 - 演示控制面板：模拟定位、距离滑块、站点选择
 - 外部高德导航跳转
+- 本地收藏、收藏夹、当前站空位提醒
+- 单站刷新，更新后显示该站 `observed_at`
+- 通知点击回到对应站点
 - 离线快照、数据年龄提示
 
 ## 技术栈
@@ -57,8 +61,9 @@
 - 状态管理：Riverpod
 - 3D/2D 点云：CustomPainter + vector_math
 - 导航：`url_launcher` + 高德 URI
-- 数据：内置 JSON 快照 / FastAPI + SQLite 实时网关
-- 后端：Python 3.14 / FastAPI / httpx / SQLite
+- 数据：内置 JSON 快照 / FastAPI 实时网关
+- 后端：Python 3.14 / FastAPI / httpx / JSON 快照 / SQLite（仅推送订阅）
+- 推送：极光 JPush（Android/iOS；HarmonyOS 后续）
 - Android：Android SDK API 36 / OpenJDK 17
 - iOS：Xcode 27 / iOS 27 Simulator
 
@@ -79,7 +84,8 @@ zju-charger/
 │   └── test/                    单元测试与 Widget 测试
 ├── backend/                     FastAPI 数据网关
 │   ├── app/                     抓取、解析、存储、API
-│   ├── data/                    站点清单、种子快照、SQLite（生成的）
+│   ├── data/                    站点清单、种子快照、snapshot.json、push.db
+│   ├── app/push.py              空位事件检测与 JPush
 │   └── tests/                   后端测试
 ├── infra/                       Docker Compose 与 Caddy 示例
 ├── .github/                     CI、PR 模板
@@ -191,7 +197,18 @@ cp .env.example .env
 .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
-接口与部署见 [后端与实时数据](docs/BACKEND.md)。
+后端只保留 6 个接口：
+
+```text
+GET    /healthz
+GET    /v1/meta
+GET    /v1/snapshot
+POST   /v1/stations/{name}/refresh
+PUT    /v1/devices/{device_id}
+DELETE /v1/devices/{device_id}
+```
+
+接口、订阅规则与部署见 [后端与实时数据](docs/BACKEND.md)；推送见 [空位提醒与推送](docs/PUSH.md)。
 
 客户端接入：
 
@@ -206,6 +223,14 @@ flutter run -d "iPhone 18 Pro" \
 ```
 
 不设置 `API_BASE_URL` 时使用内置快照；API 不可达时自动回退。
+
+没有 JPush AppKey 时可以用假 token 验证收藏/提醒订阅：
+
+```bash
+flutter run -d emulator-5554 \
+  --dart-define=API_BASE_URL=http://10.0.2.2:8000 \
+  --dart-define=DEBUG_PUSH_TOKEN=demo-push-token-1234
+```
 
 ## 测试与检查
 
@@ -223,7 +248,7 @@ cd backend
 .venv/bin/pytest -q
 ```
 
-当前客户端 6 个测试、后端 6 个测试通过：
+当前客户端 8 个测试、后端 11 个测试通过：
 
 - 地理距离/方位
 - 快照解析与计数
@@ -231,7 +256,8 @@ cd backend
 - 25m/40m 模式回差
 - 375px 宽度下无 overflow
 - 首页渲染、调试面板切 2D
-- 后端：状态码规则、快照解析、功率单位、种子快照计数、SQLite 存取
+- 本地收藏/提醒持久化、通知点击选站
+- 后端：状态码规则、快照解析、功率单位、种子快照计数、JSON 快照、订阅/冷却/旧快照跳过
 
 ## 数据说明
 
@@ -240,7 +266,7 @@ cd backend
 - 上游当前快照约 35 站点 / 135-137 设备 / 1600-1644 插口
 - 快照时间真实显示，不伪造实时数据；API 模式顶栏显示「数据」，离线模式显示「快照」
 - 3D 桩体是合成示意，不是实景结构
-- 真实 GPS、指南针、推送尚未接入
+- 真实 GPS、指南针、真实 JPush 联调尚未完成
 
 更新快照后必须重新运行 `flutter test`，确认解析计数和点云模型测试仍然通过。
 
@@ -293,9 +319,9 @@ chore: update Flutter toolchain
 ## 后续计划
 
 1. Android 真机验证
-2. 客户端 WebSocket 增量刷新与单站主动刷新
-3. 真实定位与坐标系纠偏
-4. 空位提醒（匿名设备 ID + 推送）
+2. 真实定位、指南针与坐标系纠偏
+3. JPush 账号联调、iOS APNs、推送合规
+4. 站点照片/插口编号/用户反馈
 5. HarmonyOS NEXT / Flutter-OH 验证
 
 详见 [后续清单](docs/BACKLOG.md) 与 [技术决策](docs/DECISIONS.md)。
@@ -305,6 +331,7 @@ chore: update Flutter toolchain
 - [Demo 说明](docs/DEMO.md)
 - [Android 验证](docs/ANDROID.md)
 - [后端与实时数据](docs/BACKEND.md)
+- [空位提醒与推送](docs/PUSH.md)
 - [CI 流水线](docs/CI.md)
 - [技术决策](docs/DECISIONS.md)
 - [后续清单](docs/BACKLOG.md)

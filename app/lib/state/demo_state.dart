@@ -153,6 +153,35 @@ class DemoStateNotifier extends Notifier<DemoState> {
       if (!silent) state = state.copyWith(refreshing: false);
     }
   }
+
+  Future<bool> refreshStation() async {
+    if (_fetching) return false;
+    final repository = ref.read(snapshotRepositoryProvider);
+    if (repository.apiBaseUrl.trim().isEmpty) return false;
+    _fetching = true;
+    state = state.copyWith(refreshing: true);
+    final stationName = state.target.name;
+    final previousObservedAt = state.target.observedAt;
+    try {
+      final started = await repository.refreshStation(stationName);
+      if (!started) return false;
+      for (var attempt = 0; attempt < 12; attempt++) {
+        await Future<void>.delayed(const Duration(seconds: 2));
+        final next = await repository.fetchApi();
+        if (next == null) continue;
+        final target = _stationByName(next, stationName);
+        if (target == null) continue;
+        if (target.observedAt != previousObservedAt) {
+          state = state.copyWith(snapshot: next, target: target);
+          return true;
+        }
+      }
+      return false;
+    } finally {
+      _fetching = false;
+      state = state.copyWith(refreshing: false);
+    }
+  }
 }
 
 Station? _stationByName(ChargerSnapshot snapshot, String name) {

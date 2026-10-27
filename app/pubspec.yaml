@@ -38,6 +38,9 @@ dependencies:
   vector_math: ^2.4.3
   url_launcher: ^6.3.3
   http: ^1.6.0
+  shared_preferences: ^2.5.6
+  uuid: ^4.6.0
+  jpush_flutter: ^3.5.9
 
 dev_dependencies:
   flutter_test:

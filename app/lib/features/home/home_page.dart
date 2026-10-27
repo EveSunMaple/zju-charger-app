@@ -3,9 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/push_service.dart';
 import '../../core/theme.dart';
 import '../../models/snapshot.dart';
 import '../../state/demo_state.dart';
+import '../../state/preferences_state.dart';
+import '../../state/reminder_service.dart';
 import '../debug/debug_sheet.dart';
 import 'hero_card.dart';
 import 'radar_card.dart';
@@ -24,6 +27,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   late final ScrollController _scrollController = ScrollController(
     keepScrollOffset: false,
   );
+  late final PushService _pushService;
   Timer? _pollTimer;
 
   @override
@@ -32,13 +36,42 @@ class _HomePageState extends ConsumerState<HomePage> {
     _pollTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       ref.read(demoStateProvider.notifier).refresh(silent: true);
     });
+    _pushService = ref.read(pushServiceProvider);
+    _pushService.openedStation.addListener(_onOpenedStation);
+    if (_pushService.openedStation.value != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _onOpenedStation());
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final reminderService = ref.read(reminderServiceProvider);
+      final reminders = ref.read(stationPrefsProvider).reminders;
+      if (reminderService.available && reminders.isNotEmpty) {
+        reminderService.sync(reminders);
+      }
+    });
   }
 
   @override
   void dispose() {
     _pollTimer?.cancel();
+    _pushService.openedStation.removeListener(_onOpenedStation);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onOpenedStation() {
+    final name = _pushService.openedStation.value;
+    if (name == null || name.isEmpty) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(demoStateProvider.notifier).selectStation(name);
+      final context = _sceneKey.currentContext;
+      if (context == null) return;
+      Scrollable.ensureVisible(
+        context,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeOutCubic,
+        alignment: 0,
+      );
+    });
   }
 
   void _scrollToScene(Station _) {

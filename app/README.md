@@ -39,7 +39,7 @@ flutter build apk --debug
 flutter build apk --release
 ```
 
-产物：`build/app/outputs/flutter-apk/app-debug.apk`（约 146 MB）与 `app-release.apk`（约 46 MB）。当前 release 使用 debug 签名，仅用于验证。完整环境说明见 [`../docs/ANDROID.md`](../docs/ANDROID.md)。
+产物：`build/app/outputs/flutter-apk/app-debug.apk`（约 146 MB）与 `app-release.apk`（约 54 MB）。当前 release 使用 debug 签名，仅用于验证。完整环境说明见 [`../docs/ANDROID.md`](../docs/ANDROID.md)。
 
 ## 测试
 
@@ -47,6 +47,19 @@ flutter build apk --release
 flutter analyze
 flutter test
 ```
+
+## 本地收藏与空位提醒
+
+- 收藏和提醒只保存在当前设备，不需要账号
+- 无 JPush AppKey 时，可用假 token 验证订阅流程：
+
+```bash
+flutter run -d emulator-5554 \
+  --dart-define=API_BASE_URL=http://10.0.2.2:8000 \
+  --dart-define=DEBUG_PUSH_TOKEN=demo-push-token-1234
+```
+
+- 真实推送配置见 [`../docs/PUSH.md`](../docs/PUSH.md)
 
 ## 数据
 

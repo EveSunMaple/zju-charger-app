@@ -166,6 +166,7 @@ class Station {
     required this.total,
     required this.offline,
     required this.devices,
+    this.observedAt,
   });
 
   final String name;
@@ -182,6 +183,7 @@ class Station {
   final int total;
   final int offline;
   final List<Device> devices;
+  final DateTime? observedAt;
 
   List<Port> get ports => devices
       .where((device) => !device.offline)
@@ -206,6 +208,7 @@ class Station {
       devices: (json['devices'] as List<dynamic>? ?? [])
           .map((item) => Device.fromJson(item as Map<String, dynamic>))
           .toList(growable: false),
+      observedAt: _parseDateTime(json['observed_at'] as String?),
     );
   }
 }
@@ -292,4 +295,9 @@ double _asDouble(dynamic value) {
 double? _asNullableDouble(dynamic value) {
   if (value == null) return null;
   return _asDouble(value);
+}
+
+DateTime? _parseDateTime(String? value) {
+  if (value == null || value.isEmpty) return null;
+  return DateTime.tryParse(value.replaceFirst(' ', 'T'));
 }

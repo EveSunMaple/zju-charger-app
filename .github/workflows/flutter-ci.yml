@@ -54,6 +54,8 @@ jobs:
         working-directory: app
     env:
       API_BASE_URL: ${{ vars.API_BASE_URL }}
+      JPUSH_APP_KEY: ${{ vars.JPUSH_APP_KEY }}
+      DEBUG_PUSH_TOKEN: ${{ vars.DEBUG_PUSH_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -67,7 +69,7 @@ jobs:
       - name: Install Android SDK packages
         run: |
           yes | sdkmanager --licenses > /dev/null
-          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "ndk;28.2.13676358"
+          sdkmanager "platform-tools" "platforms;android-34" "platforms;android-35" "platforms;android-36" "build-tools;36.0.0" "ndk;28.2.13676358" "cmake;3.22.1"
 
       - uses: subosito/flutter-action@v2
         with:
@@ -87,10 +89,18 @@ jobs:
       - run: flutter pub get
 
       - name: Build debug APK
-        run: flutter build apk --debug --dart-define=API_BASE_URL="$API_BASE_URL"
+        run: |
+          flutter build apk --debug \
+            --dart-define=API_BASE_URL="$API_BASE_URL" \
+            --dart-define=JPUSH_APP_KEY="$JPUSH_APP_KEY" \
+            --dart-define=DEBUG_PUSH_TOKEN="$DEBUG_PUSH_TOKEN"
 
       - name: Build release APK
-        run: flutter build apk --release --dart-define=API_BASE_URL="$API_BASE_URL"
+        run: |
+          flutter build apk --release \
+            --dart-define=API_BASE_URL="$API_BASE_URL" \
+            --dart-define=JPUSH_APP_KEY="$JPUSH_APP_KEY" \
+            --dart-define=DEBUG_PUSH_TOKEN="$DEBUG_PUSH_TOKEN"
 
       - name: Checksums
         run: |
@@ -118,4 +128,4 @@ jobs:
           echo "- Release APK: \`app-release.apk\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Artifact: \`zju-charger-android-${{ github.sha }}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "在该 Actions run 的 Artifacts 下载并安装。未配置 \`API_BASE_URL\` 时使用离线快照。" >> "$GITHUB_STEP_SUMMARY"
+          echo "在该 Actions run 的 Artifacts 下载并安装。未配置 \`API_BASE_URL\` 时使用离线快照；未配置 \`JPUSH_APP_KEY\` 时推送关闭。" >> "$GITHUB_STEP_SUMMARY"

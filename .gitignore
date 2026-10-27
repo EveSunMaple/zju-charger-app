@@ -14,3 +14,5 @@ backend/data/state.db
 backend/data/state.db-*
 backend/data/device_cache.json
 backend/data/fetch.log
+backend/data/push.db
+backend/data/push.db-*
