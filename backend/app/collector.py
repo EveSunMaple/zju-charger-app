@@ -114,8 +114,10 @@ class Collector:
                 }
             )
             previous = self.current
+            started_at = datetime.now(CST)
             try:
                 snapshot, stats = await self.client.refresh_all(self.stations)
+                snapshot = self._preserve_newer_stations(snapshot, started_at)
                 self.current = self._ensure_observed_at(snapshot)
                 self.store.save(self.current)
                 self._full_status["last_stats"] = stats
@@ -236,6 +238,39 @@ class Collector:
             if station["name"] == name:
                 return station
         return None
+
+    def _preserve_newer_stations(
+        self,
+        snapshot: dict,
+        started_at: datetime,
+    ) -> dict:
+        if not self.current:
+            return snapshot
+        current_by_name = {
+            station["name"]: station for station in self.current.get("stations", [])
+        }
+        stations = []
+        for station in snapshot.get("stations", []):
+            current = current_by_name.get(station["name"])
+            if current is not None and self._observed_after(current, started_at):
+                stations.append(current)
+            else:
+                stations.append(station)
+        snapshot["stations"] = stations
+        return recalculate_snapshot(snapshot, area_id=self.settings.area_id)
+
+    @staticmethod
+    def _observed_after(station: dict, started_at: datetime) -> bool:
+        value = station.get("observed_at")
+        if not value:
+            return False
+        try:
+            observed = datetime.strptime(value, "%Y-%m-%d %H:%M:%S").replace(
+                tzinfo=CST
+            )
+        except ValueError:
+            return False
+        return observed > started_at
 
     def _ensure_observed_at(self, snapshot: dict | None) -> dict | None:
         if snapshot is None:

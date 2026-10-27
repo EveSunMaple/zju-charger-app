@@ -333,18 +333,38 @@ def power_jobs(cache: dict[str, dict]) -> list[tuple[str, str]]:
 class IntervalLimiter:
     def __init__(self, interval: float):
         self.interval = max(0.0, interval)
-        self._lock = asyncio.Lock()
-        self._next_at = 0.0
+        self._queue: asyncio.PriorityQueue = asyncio.PriorityQueue()
+        self._counter = 0
+        self._worker: asyncio.Task | None = None
+        self._worker_lock = asyncio.Lock()
 
-    async def wait(self) -> None:
+    async def wait(self, priority: int = 10) -> None:
         if self.interval <= 0:
             return
-        async with self._lock:
-            now = time.monotonic()
-            delay = self._next_at - now
-            if delay > 0:
-                await asyncio.sleep(delay)
-            self._next_at = time.monotonic() + self.interval
+        loop = asyncio.get_running_loop()
+        future = loop.create_future()
+        self._counter += 1
+        await self._queue.put((priority, self._counter, future))
+        await self._ensure_worker()
+        await future
+
+    async def _ensure_worker(self) -> None:
+        async with self._worker_lock:
+            if self._worker is None or self._worker.done():
+                self._worker = asyncio.create_task(self._run())
+
+    async def _run(self) -> None:
+        while True:
+            _, _, future = await self._queue.get()
+            if not future.done():
+                future.set_result(True)
+            await asyncio.sleep(self.interval)
+
+    async def close(self) -> None:
+        if self._worker is not None:
+            self._worker.cancel()
+            await asyncio.gather(self._worker, return_exceptions=True)
+            self._worker = None
 
 
 class UpstreamClient:
@@ -364,6 +384,8 @@ class UpstreamClient:
         self.throttled = 0
 
     async def close(self) -> None:
+        await self._device_limiter.close()
+        await self._power_limiter.close()
         await self._client.aclose()
 
     async def _request(self, url: str, data: dict) -> dict:
@@ -371,12 +393,16 @@ class UpstreamClient:
         response.raise_for_status()
         return response.json()
 
-    async def fetch_device(self, devaddress: str) -> tuple[dict | None, str | None]:
+    async def fetch_device(
+        self,
+        devaddress: str,
+        priority: int = 10,
+    ) -> tuple[dict | None, str | None]:
         data = {"areaId": self.settings.area_id, "devaddress": devaddress}
         wait = 5.0
         last_message = None
         for attempt in range(self.settings.max_retries):
-            await self._device_limiter.wait()
+            await self._device_limiter.wait(priority)
             try:
                 payload = await self._request(self.settings.upstream_device_url, data)
             except Exception as exc:
@@ -410,13 +436,16 @@ class UpstreamClient:
         return None, "error" if last_message else None
 
     async def fetch_power(
-        self, devaddress: str, port: str
+        self,
+        devaddress: str,
+        port: str,
+        priority: int = 10,
     ) -> tuple[dict | None, str | None]:
         data = {"devaddress": devaddress, "devport": port}
         wait = 5.0
         last_message = None
         for attempt in range(self.settings.max_retries):
-            await self._power_limiter.wait()
+            await self._power_limiter.wait(priority)
             try:
                 payload = await self._request(self.settings.upstream_power_url, data)
             except Exception as exc:
@@ -493,7 +522,7 @@ class UpstreamClient:
     async def refresh_station(self, station: dict) -> tuple[dict | None, int]:
         cache: dict[str, dict] = {}
         for devaddress in station["device_ids"]:
-            obj, error = await self.fetch_device(devaddress)
+            obj, error = await self.fetch_device(devaddress, priority=0)
             if obj:
                 cache[devaddress] = parse_device(obj)
             elif error == "offline":
@@ -501,7 +530,7 @@ class UpstreamClient:
         jobs = power_jobs(cache)[: self.settings.station_power_limit]
         power_map: dict[tuple[str, str], dict] = {}
         for devaddress, port in jobs:
-            obj, _ = await self.fetch_power(devaddress, port)
+            obj, _ = await self.fetch_power(devaddress, port, priority=0)
             if obj:
                 parsed = parse_tewlog(obj)
                 if parsed:
