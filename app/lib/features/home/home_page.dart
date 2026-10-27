@@ -1,28 +1,42 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme.dart';
 import '../../models/snapshot.dart';
+import '../../state/demo_state.dart';
 import '../debug/debug_sheet.dart';
 import 'hero_card.dart';
 import 'radar_card.dart';
 import 'scene_card.dart';
 import 'top_bar.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends ConsumerState<HomePage> {
   final GlobalKey _sceneKey = GlobalKey();
   late final ScrollController _scrollController = ScrollController(
     keepScrollOffset: false,
   );
+  Timer? _pollTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _pollTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      ref.read(demoStateProvider.notifier).refresh(silent: true);
+    });
+  }
 
   @override
   void dispose() {
+    _pollTimer?.cancel();
     _scrollController.dispose();
     super.dispose();
   }

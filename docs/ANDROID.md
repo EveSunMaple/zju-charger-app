@@ -91,6 +91,13 @@ flutter build apk --release
 flutter run -d emulator-5554
 ```
 
+联调实时后端：
+
+```bash
+flutter run -d emulator-5554 \
+  --dart-define=API_BASE_URL=http://10.0.2.2:8000
+```
+
 产物：
 
 ```text

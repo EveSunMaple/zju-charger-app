@@ -8,3 +8,9 @@ backend/data/*.tmp
 node_modules/
 dist/
 
+
+# Backend
+backend/data/state.db
+backend/data/state.db-*
+backend/data/device_cache.json
+backend/data/fetch.log

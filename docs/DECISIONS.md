@@ -72,3 +72,20 @@
 - 决策：Android Gradle 仓库在官方仓库前加入阿里云 Google / Central / Gradle Plugin 镜像。
 - 原因：直接访问 Google Maven 出现 429，且 Flutter 引擎下载速度不稳定。
 - 影响：国内构建更稳定；海外环境可移除镜像，仅保留 `google()` / `mavenCentral()`。
+
+## ADR-010 后端使用 FastAPI + SQLite
+
+- 状态：已确定
+- 日期：2026-10-27
+- 决策：服务端使用 FastAPI + httpx + SQLite，保存最新完整快照，客户端通过 `/v1/snapshot` 获取。
+- 原因：复用已验证的状态语义和功率解析；SQLite 单文件部署简单，35 站点规模足够；后续可迁移 PostgreSQL。
+- 约束：上游 1.2s 串行限流，全量刷新约 3-4 分钟；客户端显示数据年龄。
+- 后续：多实例部署时迁移 PostgreSQL + Redis Pub/Sub。
+
+## ADR-011 客户端 API 优先、离线兜底
+
+- 状态：已确定
+- 日期：2026-10-27
+- 决策：设置 `API_BASE_URL` 时优先请求 `/v1/snapshot`；失败或未设置时回退 `assets/data/snapshot.json`。
+- 显示：API 模式顶栏显示「数据」，离线模式显示「快照」。
+- 原因：保证没有后端时 demo 仍可运行，同时支持本地/服务器联调。

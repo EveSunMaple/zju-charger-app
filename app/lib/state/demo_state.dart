@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/geo.dart';
+import '../data/snapshot_repository.dart';
 import '../models/snapshot.dart';
 
 enum SceneMode { threeD, topDown }
@@ -8,6 +9,10 @@ enum SceneMode { threeD, topDown }
 final snapshotProvider = Provider<ChargerSnapshot>((ref) {
   throw UnimplementedError('snapshotProvider must be overridden');
 });
+
+final snapshotRepositoryProvider = Provider<SnapshotRepository>(
+  (ref) => const SnapshotRepository(),
+);
 
 final demoStateProvider = NotifierProvider<DemoStateNotifier, DemoState>(
   DemoStateNotifier.new,
@@ -65,6 +70,7 @@ class DemoState {
   }
 
   DemoState copyWith({
+    ChargerSnapshot? snapshot,
     Station? target,
     bool? simEnabled,
     double? simDistance,
@@ -72,7 +78,7 @@ class DemoState {
     bool? refreshing,
   }) {
     return DemoState(
-      snapshot: snapshot,
+      snapshot: snapshot ?? this.snapshot,
       target: target ?? this.target,
       simEnabled: simEnabled ?? this.simEnabled,
       simDistance: simDistance ?? this.simDistance,
@@ -83,6 +89,8 @@ class DemoState {
 }
 
 class DemoStateNotifier extends Notifier<DemoState> {
+  bool _fetching = false;
+
   @override
   DemoState build() {
     final snapshot = ref.watch(snapshotProvider);
@@ -127,12 +135,31 @@ class DemoStateNotifier extends Notifier<DemoState> {
     state = state.copyWith(simEnabled: enabled);
   }
 
-  Future<void> refresh() async {
-    if (state.refreshing) return;
-    state = state.copyWith(refreshing: true);
-    await Future<void>.delayed(const Duration(milliseconds: 650));
-    state = state.copyWith(refreshing: false);
+  Future<bool> refresh({bool silent = false}) async {
+    if (_fetching) return false;
+    final repository = ref.read(snapshotRepositoryProvider);
+    if (repository.apiBaseUrl.trim().isEmpty) return false;
+    _fetching = true;
+    if (!silent) state = state.copyWith(refreshing: true);
+    try {
+      final next = await repository.fetchApi();
+      if (next == null) return false;
+      final target =
+          _stationByName(next, state.target.name) ?? _defaultTarget(next);
+      state = state.copyWith(snapshot: next, target: target);
+      return true;
+    } finally {
+      _fetching = false;
+      if (!silent) state = state.copyWith(refreshing: false);
+    }
   }
+}
+
+Station? _stationByName(ChargerSnapshot snapshot, String name) {
+  for (final station in snapshot.stations) {
+    if (station.name == name) return station;
+  }
+  return null;
 }
 
 Station _defaultTarget(ChargerSnapshot snapshot) {

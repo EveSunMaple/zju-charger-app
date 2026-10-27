@@ -144,11 +144,17 @@ class HeroCard extends ConsumerWidget {
                   onTap: state.refreshing
                       ? null
                       : () async {
-                          await ref.read(demoStateProvider.notifier).refresh();
+                          final updated = await ref
+                              .read(demoStateProvider.notifier)
+                              .refresh();
                           if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('演示快照无需刷新，数据未变化')),
-                          );
+                          final message = updated
+                              ? '数据已更新'
+                              : (state.snapshot.source == 'api'
+                                    ? '刷新失败，请检查后端服务'
+                                    : '演示快照无需刷新，数据未变化');
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(SnackBar(content: Text(message)));
                         },
                 ),
               ),
@@ -170,7 +176,11 @@ class HeroCard extends ConsumerWidget {
               ],
               Expanded(
                 child: Text(
-                  state.refreshing ? '正在刷新演示数据…' : '演示快照 · 数据来自离线文件',
+                  state.refreshing
+                      ? '正在同步数据…'
+                      : (state.snapshot.source == 'api'
+                            ? '实时数据 · 来自校园充电桩网关'
+                            : '演示快照 · 数据来自离线文件'),
                   style: AppText.tiny,
                 ),
               ),

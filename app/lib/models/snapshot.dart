@@ -226,6 +226,7 @@ class ChargerSnapshot {
     required this.portOffline,
     required this.powerPorts,
     required this.stations,
+    this.source = 'asset',
   });
 
   final String scope;
@@ -242,8 +243,12 @@ class ChargerSnapshot {
   final int portOffline;
   final int powerPorts;
   final List<Station> stations;
+  final String source;
 
-  factory ChargerSnapshot.fromJson(Map<String, dynamic> json) {
+  factory ChargerSnapshot.fromJson(
+    Map<String, dynamic> json, {
+    String source = 'asset',
+  }) {
     final fetchedAtText = json['fetched_at'] as String? ?? '';
     final parsedFetchedAt = DateTime.tryParse(
       fetchedAtText.replaceFirst(' ', 'T'),
@@ -267,6 +272,7 @@ class ChargerSnapshot {
       stations: (json['stations'] as List<dynamic>? ?? [])
           .map((item) => Station.fromJson(item as Map<String, dynamic>))
           .toList(growable: false),
+      source: source,
     );
   }
 }

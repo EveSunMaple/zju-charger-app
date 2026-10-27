@@ -15,6 +15,7 @@ class TopBar extends ConsumerWidget {
     final stale = isSnapshotStale(snapshot.fetchedAt);
     final statusText = state.simEnabled ? '模拟定位' : '演示位置';
     final statusColor = state.simEnabled ? AppColors.warn : AppColors.fault;
+    final sourceLabel = snapshot.source == 'api' ? '数据' : '快照';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(2, 4, 2, 2),
@@ -64,7 +65,7 @@ class TopBar extends ConsumerWidget {
                       child: Text('·', style: AppText.small),
                     ),
                     Text(
-                      '快照 ${formatSnapshotTime(snapshot.fetchedAt)} · '
+                      '$sourceLabel ${formatSnapshotTime(snapshot.fetchedAt)} · '
                       '${formatAge(snapshot.fetchedAt)}',
                       style: AppText.small.copyWith(
                         color: stale ? AppColors.warn : AppColors.sub,

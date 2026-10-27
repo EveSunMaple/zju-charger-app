@@ -9,8 +9,9 @@
 | iOS 模拟器 | 已验证（iPhone 18 Pro / iOS 27） |
 | Android 模拟器 | 已验证（Pixel 7 / Android 16 / API 36） |
 | Android 构建 | debug APK 约 146 MB，release APK 约 48 MB |
-| 数据 | 离线快照：35 站点 / 137 设备 / 1644 插口 |
-| 后端实时数据 | 未开始 |
+| 数据 | 离线快照 + FastAPI 实时网关 |
+| 实时网关 | 已实现：SQLite 快照、全量/单站刷新、功率遥测、WebSocket 事件 |
+| 客户端联调 | Android debug 包已拉到真实 `/v1/snapshot` |
 | 账号 / 推送 | 未开始，v1 计划不做账号 |
 | HarmonyOS | 最后处理，尚未开始 |
 | 内嵌地图 | 暂不做，v1 使用外部高德 URI |
@@ -56,7 +57,8 @@
 - 状态管理：Riverpod
 - 3D/2D 点云：CustomPainter + vector_math
 - 导航：`url_launcher` + 高德 URI
-- 数据：内置 JSON 快照
+- 数据：内置 JSON 快照 / FastAPI + SQLite 实时网关
+- 后端：Python 3.14 / FastAPI / httpx / SQLite
 - Android：Android SDK API 36 / OpenJDK 17
 - iOS：Xcode 27 / iOS 27 Simulator
 
@@ -75,7 +77,12 @@ zju-charger/
 │   │   └── state/               Riverpod 演示状态
 │   ├── assets/data/             离线快照
 │   └── test/                    单元测试与 Widget 测试
-├── docs/                        设计、Demo、Android、决策、后续清单
+├── backend/                     FastAPI 数据网关
+│   ├── app/                     抓取、解析、存储、API
+│   ├── data/                    站点清单、种子快照、SQLite（生成的）
+│   └── tests/                   后端测试
+├── infra/                       Docker Compose 与 Caddy 示例
+├── docs/                        设计、Demo、Android、后端、决策、后续清单
 ├── screenshots/                 iOS 与 Android 截图
 └── README.md
 ```
@@ -146,6 +153,32 @@ app/build/app/outputs/flutter-apk/app-release.apk
 
 当前 release 使用 debug 签名，只用于验证，正式发布前需要配置正式 keystore。
 
+## 后端
+
+```bash
+cd backend
+python3 -m venv .venv
+.venv/bin/pip install -r requirements-dev.txt
+cp .env.example .env
+.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+接口与部署见 [后端与实时数据](docs/BACKEND.md)。
+
+客户端接入：
+
+```bash
+# Android 模拟器
+flutter run -d emulator-5554 \
+  --dart-define=API_BASE_URL=http://10.0.2.2:8000
+
+# iOS 模拟器
+flutter run -d "iPhone 18 Pro" \
+  --dart-define=API_BASE_URL=http://127.0.0.1:8000
+```
+
+不设置 `API_BASE_URL` 时使用内置快照；API 不可达时自动回退。
+
 ## 测试与检查
 
 ```bash
@@ -155,7 +188,14 @@ flutter analyze
 flutter test
 ```
 
-当前 6 个测试通过：
+后端：
+
+```bash
+cd backend
+.venv/bin/pytest -q
+```
+
+当前客户端 6 个测试、后端 6 个测试通过：
 
 - 地理距离/方位
 - 快照解析与计数
@@ -163,15 +203,16 @@ flutter test
 - 25m/40m 模式回差
 - 375px 宽度下无 overflow
 - 首页渲染、调试面板切 2D
+- 后端：状态码规则、快照解析、功率单位、种子快照计数、SQLite 存取
 
 ## 数据说明
 
-- 数据文件：`app/assets/data/snapshot.json`
-- 来源：原有网页原型的离线快照
-- 内容：35 站点 / 137 设备 / 1644 插口
-- 快照时间真实显示，不伪造实时数据
+- 离线文件：`app/assets/data/snapshot.json`
+- 实时网关：`backend/`，服务端代理上游接口
+- 上游当前快照约 35 站点 / 135-137 设备 / 1600-1644 插口
+- 快照时间真实显示，不伪造实时数据；API 模式顶栏显示「数据」，离线模式显示「快照」
 - 3D 桩体是合成示意，不是实景结构
-- 真实 GPS、指南针、后端推送尚未接入
+- 真实 GPS、指南针、推送尚未接入
 
 更新快照后必须重新运行 `flutter test`，确认解析计数和点云模型测试仍然通过。
 
@@ -204,26 +245,27 @@ chore: update Flutter toolchain
 1. `dart format --output=none --set-exit-if-changed lib test`
 2. `flutter analyze`
 3. `flutter test`
-4. UI 改动附上 iOS/Android 截图
-5. 数据模型或接口改动同步更新 `docs/`
-6. 不提交 `build/`、`.dart_tool/`、`local.properties`、密钥或 `.env`
+4. 后端改动运行 `cd backend && .venv/bin/pytest -q`
+5. UI 改动附上 iOS/Android 截图
+6. 数据模型或接口改动同步更新 `docs/`
+7. 不提交 `build/`、`.dart_tool/`、`local.properties`、`state.db`、密钥或 `.env`
 
 ### 不要提交
 
 - `app/build/`
 - `app/.dart_tool/`
 - `app/android/local.properties`
-- `backend/.env`（后续后端）
+- `backend/.env`
 - 任何 keystore、证书、token、服务器密码
 
 ### 数据/接口改动
 
-当前 demo 直接读取 `app/assets/data/snapshot.json`。接入后端时，保持 `app/lib/models/snapshot.dart` 的字段兼容，或同步升级测试和 `docs/DECISIONS.md`。
+客户端默认读取 `app/assets/data/snapshot.json`，设置 `API_BASE_URL` 后优先请求 `/v1/snapshot`，失败自动回退。接口字段变更时保持 `app/lib/models/snapshot.dart` 兼容，或同步升级测试和 `docs/DECISIONS.md`。
 
 ## 后续计划
 
 1. Android 真机验证
-2. FastAPI 数据网关 + WebSocket
+2. 客户端 WebSocket 增量刷新与单站主动刷新
 3. 真实定位与坐标系纠偏
 4. 空位提醒（匿名设备 ID + 推送）
 5. HarmonyOS NEXT / Flutter-OH 验证
@@ -234,6 +276,7 @@ chore: update Flutter toolchain
 
 - [Demo 说明](docs/DEMO.md)
 - [Android 验证](docs/ANDROID.md)
+- [后端与实时数据](docs/BACKEND.md)
 - [技术决策](docs/DECISIONS.md)
 - [后续清单](docs/BACKLOG.md)
 - [协作指南](CONTRIBUTING.md)

@@ -33,12 +33,30 @@ Android 16 / API 36 模拟器：
 
 ## 运行
 
+纯离线：
+
 ```bash
 cd app
 flutter pub get
 open -a Simulator
 flutter run
 ```
+
+接实时后端：
+
+```bash
+cd backend
+python3 -m venv .venv
+.venv/bin/pip install -r requirements-dev.txt
+cp .env.example .env
+.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+cd ../app
+flutter run -d "iPhone 18 Pro" \
+  --dart-define=API_BASE_URL=http://127.0.0.1:8000
+```
+
+Android 模拟器把地址换成 `http://10.0.2.2:8000`。接口说明见 [BACKEND.md](BACKEND.md)。
 
 指定设备：
 
@@ -69,8 +87,10 @@ flutter run -d "iPhone 18 Pro"
 
 - 没有真实 GPS，使用调试面板的模拟定位
 - 没有指南针传感器，指北针使用模拟方位
-- 没有后端，刷新按钮只做模拟刷新
+- 未启动后端时自动回退离线快照；刷新按钮只同步服务端最新快照，不直接触发上游抓取
 - 3D 桩体为合成示意，不是实景结构
+- 全量刷新约 3-4 分钟，不是秒级实时
+- 单站刷新合并进全量快照，全量 `fetched_at` 不变，单站有 `observed_at`
 - iOS 模拟器与 Android 16 / API 36 模拟器已验证；真机与 HarmonyOS 后续
 - 地图按钮使用外部高德 URI，模拟器中会打开 Safari
 

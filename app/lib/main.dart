@@ -7,10 +7,15 @@ import 'state/demo_state.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final snapshot = await SnapshotRepository().load();
+  const apiBaseUrl = String.fromEnvironment('API_BASE_URL');
+  final repository = SnapshotRepository(apiBaseUrl: apiBaseUrl);
+  final snapshot = await repository.load();
   runApp(
     ProviderScope(
-      overrides: [snapshotProvider.overrideWithValue(snapshot)],
+      overrides: [
+        snapshotProvider.overrideWithValue(snapshot),
+        snapshotRepositoryProvider.overrideWithValue(repository),
+      ],
       child: const ZjuChargerApp(),
     ),
   );

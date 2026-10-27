@@ -36,11 +36,22 @@ chore: update dependencies
 
 ## 开发与测试
 
+客户端：
+
 ```bash
 cd app
 dart format lib test
 flutter analyze
 flutter test
+```
+
+后端：
+
+```bash
+cd backend
+python3 -m venv .venv
+.venv/bin/pip install -r requirements-dev.txt
+.venv/bin/pytest -q
 ```
 
 iOS：
@@ -69,7 +80,7 @@ PR 描述请包含：
 - 如何验证（命令、设备、截图）
 - 已知限制
 
-UI 改动附 iOS/Android 截图。数据模型或接口改动同步更新 `docs/` 和测试。
+UI 改动附 iOS/Android 截图。数据模型或接口改动同步更新 `docs/` 和测试。后端改动至少运行 `pytest`。
 
 ## 代码约定
 
